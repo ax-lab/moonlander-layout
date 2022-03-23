@@ -5,7 +5,8 @@
 		"biton",
 		"consts",
 		"deps",
-		"PSCREEN"
+		"PSCREEN",
+		"uprintf"
 	],
 	"flagWords": [
 		"teh"

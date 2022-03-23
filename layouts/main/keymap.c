@@ -1,5 +1,19 @@
 #include "moonlander.h"
 #include "version.h"
+#include "print.h"
+
+#ifdef CONSOLE_ENABLE
+	#define ENABLE_OUTPUT 1
+#else
+	#define ENABLE_OUTPUT 0
+#endif
+
+#if ENABLE_OUTPUT
+	#include "print.h"
+	#define output uprintf
+#else
+	#define output(...) (void)0
+#endif
 
 #define KC_MAC_UNDO LGUI(KC_Z)
 #define KC_MAC_CUT LGUI(KC_X)
@@ -155,9 +169,24 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 extern bool g_suspend_state;
 extern rgb_config_t rgb_matrix_config;
 
+static uint32_t welcome_msg_timer = 0;
+static bool welcome_msg_trigger = true;
+
 void keyboard_post_init_user(void)
 {
 	rgb_matrix_enable();
+	welcome_msg_timer = timer_read32();
+	welcome_msg_trigger = false;
+}
+
+void matrix_scan_user(void)
+{
+	if (!welcome_msg_trigger) {
+		if (timer_elapsed32(welcome_msg_timer) > 5000) {
+			output("keyboard init: %dx%d (%d leds)", MATRIX_ROWS, MATRIX_COLS, DRIVER_LED_TOTAL);
+			welcome_msg_trigger = true;
+		}
+	}
 }
 
 const uint8_t PROGMEM ledmap[][DRIVER_LED_TOTAL][3] = {
@@ -277,6 +306,10 @@ void rgb_matrix_indicators_user(void)
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record)
 {
+	output("KL: kc: 0x%04X, col: %u, row: %u, pressed: %b, time: %u, interrupt: %b, count: %u\n",
+		keycode, record->event.key.col, record->event.key.row, record->event.pressed,
+		record->event.time, record->tap.interrupted, record->tap.count);
+
 	switch (keycode)
 	{
 	case RGB_SLD:
