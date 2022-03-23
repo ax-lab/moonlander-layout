@@ -8,8 +8,10 @@ KEYMAPS := $(QMK_HOME)/keyboards/moonlander/keymaps
 build:
 	$(call CLEAN)
 	@echo Copying custom layouts...
-	@cp -p -r layouts/oryx-source $(KEYMAPS)
-	@qmk compile -km oryx-source
+	# @cp -p -r layouts/oryx-source $(KEYMAPS)
+	# @qmk compile -km oryx-source
+	@cp -p -r layouts/main $(KEYMAPS)
+	@qmk compile -km main
 	$(call COPY_BUILDS)
 	$(call CLEAN)
 
@@ -39,4 +41,5 @@ endef
 define CLEAN
 	@echo Cleaning up custom layouts...
 	@rm -rf $(KEYMAPS)/oryx-source
+	@rm -rf $(KEYMAPS)/main
 endef
