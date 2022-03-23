@@ -1,0 +1,22 @@
+{
+	"version": "0.2",
+	"language": "en",
+	"words": [
+		"biton",
+		"consts",
+		"deps",
+		"PSCREEN"
+	],
+	"flagWords": [
+		"teh"
+	],
+	"ignorePaths": [
+		".vscode/**",
+		"zsa/**",
+		"cspell.json"
+	],
+	"ignoreRegExpList": [
+		"`[^\\s]+`",
+		"(\\b|_)[A-Z]{4,6}(\\b|_)"
+	]
+}
