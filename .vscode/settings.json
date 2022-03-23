@@ -1,0 +1,7 @@
+{
+	"files.associations": {
+		"keymap_german.h": "c",
+		"version.h": "c",
+		"keymap_nordic.h": "c"
+	}
+}
