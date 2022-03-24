@@ -15,7 +15,7 @@
 	#define output(...) (void)0
 #endif
 
-#include "theme.h"
+#include "leds.h"
 
 #define KC_MAC_UNDO LGUI(KC_Z)
 #define KC_MAC_CUT LGUI(KC_X)
@@ -250,19 +250,19 @@ void rgb_matrix_indicators_user(void)
 			color_test.timer = timer_read32();
 			color_test.row = 0;
 			color_test.col = 0;
-			color_test.index = led_index(0, 0);
+			color_test.index = led_index_from_row_and_col(0, 0);
 		} else {
-			if (timer_elapsed32(color_test.timer) >= 10) {
+			if (timer_elapsed32(color_test.timer) >= 25) {
 				color_test.col++;
-				if (color_test.col >= MATRIX_COLS) {
+				if (color_test.col >= LAYOUT_COLS) {
 					color_test.col = 0;
 					color_test.row++;
 				}
-				if (color_test.row >= MATRIX_ROWS) {
+				if (color_test.row >= LAYOUT_ROWS) {
 					color_test.choice = true;
 					color_test.index = NO_LED;
 				} else {
-					color_test.index = led_index(color_test.row, color_test.col);
+					color_test.index = led_index_from_pos(color_test.row, color_test.col);
 					if (color_test.index != NO_LED) {
 						color_test.timer = timer_read32();
 					}
@@ -285,7 +285,7 @@ void rgb_matrix_indicators_user(void)
 			float f = (float)rgb_matrix_config.hsv.v / UINT8_MAX;
 			for (uint8_t row = 0; row < MATRIX_ROWS; row++) {
 				for (uint8_t col = 0; col < MATRIX_COLS; col++) {
-					uint8_t index = led_index(row, col);
+					uint8_t index = led_index_from_row_and_col(row, col);
 					if (index != NO_LED) {
 						RGB cur = color_for_position(row, col, false);
 						rgb_matrix_set_color(index, f * cur.r, f * cur.g, f * cur.b);

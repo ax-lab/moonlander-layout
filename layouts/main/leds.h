@@ -55,7 +55,10 @@ const uint8_t PROGMEM ledmap[][DRIVER_LED_TOTAL][3] = {
 	[14] = {RED, PNK, RED, PNK, PNK, PNK, ORY, ORY, ORY, PNK, PNK, PNK, BLU, BLU, PNK, PNK, BLU, BLU, BLU, BLU, RED, PNK, BLU, BLU, PNK, PNK, PNK, PNK, ORY, PNK, WHI, RED, ORY, ORY, PNK, ORY, YLW, ORY, RED, BLU, PNK, YLW, PNK, BLU, BLU, BLU, PNK, YLW, YLW, YLW, PNK, PNK, YLW, YLW, YLW, PNK, PNK, YLW, YLW, YLW, YLW, PNK, PNK, PNK, PNK, VIO, WHI, RED, PNK, BLU, ORY, BLU},
 };
 
-uint8_t led_index(uint8_t row, uint8_t col)
+/**
+ * Returns the index for a led respective to matrix row and column.
+ */
+uint8_t led_index_from_row_and_col(uint8_t row, uint8_t col)
 {
 	uint8_t index[8];
 	uint8_t count = rgb_matrix_map_row_column_to_led(row, col, index);
@@ -63,4 +66,52 @@ uint8_t led_index(uint8_t row, uint8_t col)
 		return index[0];
 	}
 	return NO_LED;
+}
+
+/** Number of physical rows in the keyboard. */
+#define LAYOUT_ROWS 6
+
+/** Number of physical cols in the keyboard. */
+#define LAYOUT_COLS 14
+
+/**
+ * Led index for a key by its physical layout position.
+ *
+ * This differs from the matrix row and column in that it takes into account
+ * the actual position of the keys in the physical keyboard.
+ */
+uint8_t led_index_from_pos(uint8_t layout_row, uint8_t layout_col) {
+	if (layout_row >= LAYOUT_ROWS || layout_col >= LAYOUT_COLS) {
+		return NO_LED;
+	}
+
+	// each halve of the keyboard is mapped as separate rows
+	uint8_t row = layout_row;
+	uint8_t col = layout_col;
+	if (row == 5) {
+		// the thumb cluster is considered as if aligned at the center
+		// with the thumb key at the inner border of the keyboard
+		switch (col) {
+			case 3:
+			case 4:
+			case 5:
+			case 6:
+				col -= 3;
+				break;
+			case 7:
+			case 8:
+			case 9:
+			case 10:
+				row = 11;
+				col -= 4;
+				break;
+			default:
+				return NO_LED;
+		}
+	} else if (col >= 7) {
+		col -= 7;
+		row += 6;
+	}
+
+	return led_index_from_row_and_col(row, col);
 }
