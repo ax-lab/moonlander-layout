@@ -16,6 +16,11 @@
 #endif
 
 #include "leds.h"
+#include "overlay.h"
+
+#include "overlay_rainbow.h"
+#include "overlay_simple_snake.h"
+#include "overlay_menu.h"
 
 #define KC_MAC_UNDO LGUI(KC_Z)
 #define KC_MAC_CUT LGUI(KC_X)
@@ -213,29 +218,6 @@ void set_layer_color(int layer)
 	}
 }
 
-static struct {
-	bool enabled;
-	bool initialized;
-	bool choice;
-	uint32_t timer;
-	uint8_t row;
-	uint8_t col;
-	uint8_t index;
-} color_test = { 0 };
-
-RGB color_for_position(uint8_t row, uint8_t col, bool print)
-{
-	uint8_t max = MATRIX_COLS * MATRIX_ROWS;
-	uint8_t pos = row * MATRIX_COLS + col;
-	uint8_t v = ((float)pos / (max - 1)) * 0xFF;
-	HSV hsv = { v, 255, 255 };
-	RGB rgb = hsv_to_rgb(hsv);
-	if (print) {
-		output("HUE = %d / RGB: #%02X%02X%02X\n", v, rgb.r, rgb.g, rgb.b);
-	}
-	return rgb;
-}
-
 void rgb_matrix_indicators_user(void)
 {
 	if (g_suspend_state || keyboard_config.disable_layer_led)
@@ -243,62 +225,10 @@ void rgb_matrix_indicators_user(void)
 		return;
 	}
 
-	if (color_test.enabled) {
-		if (!color_test.initialized) {
-			color_test.initialized = true;
-			color_test.choice = false;
-			color_test.timer = timer_read32();
-			color_test.row = 0;
-			color_test.col = 0;
-			color_test.index = led_index_from_row_and_col(0, 0);
-		} else {
-			if (timer_elapsed32(color_test.timer) >= 25) {
-				color_test.col++;
-				if (color_test.col >= LAYOUT_COLS) {
-					color_test.col = 0;
-					color_test.row++;
-				}
-				if (color_test.row >= LAYOUT_ROWS) {
-					color_test.choice = true;
-					color_test.index = NO_LED;
-				} else {
-					color_test.index = led_index_from_pos(color_test.row, color_test.col);
-					if (color_test.index != NO_LED) {
-						color_test.timer = timer_read32();
-					}
-				}
-			}
-		}
-
-		HSV hsv = { 0, 255, 255 };
-		RGB rgb = hsv_to_rgb(hsv);
-		for (int i = 0; i < DRIVER_LED_TOTAL; i++)
-		{
-			if (i == color_test.index) {
-				rgb_matrix_set_color(i, rgb.r, rgb.g, rgb.b);
-			} else {
-				rgb_matrix_set_color(i, 0, 0, 0);
-			}
-		}
-
-		if (color_test.choice) {
-			float f = (float)rgb_matrix_config.hsv.v / UINT8_MAX;
-			for (uint8_t row = 0; row < MATRIX_ROWS; row++) {
-				for (uint8_t col = 0; col < MATRIX_COLS; col++) {
-					uint8_t index = led_index_from_row_and_col(row, col);
-					if (index != NO_LED) {
-						RGB cur = color_for_position(row, col, false);
-						rgb_matrix_set_color(index, f * cur.r, f * cur.g, f * cur.b);
-					}
-				}
-			}
-		}
-
+	if (current_overlay.rgb != NULL) {
+		current_overlay.rgb();
 		return;
-	} else {
-		color_test.initialized = false;
 	}
-
 
 	switch (biton32(layer_state))
 	{
@@ -362,18 +292,13 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record)
 		keycode, record->event.key.col, record->event.key.row, record->event.pressed,
 		record->event.time, record->tap.interrupted, record->tap.count);
 
-	if (record->event.key.col == 0 && record->event.key.row == 6 && is_shift_pressed && record->event.pressed) {
-		unregister_code(KC_LSHIFT);
-		color_test.enabled = !color_test.enabled;
-		return false;
+	if (current_overlay.process != NULL) {
+		return current_overlay.process(keycode, record);
 	}
 
-	if (color_test.enabled) {
-		if (color_test.choice && !record->event.pressed) {
-			color_test.choice = false;
-			color_test.enabled = false;
-			color_for_position(record->event.key.row, record->event.key.col, true);
-		}
+	if (record->event.key.col == 0 && record->event.key.row == 6 && is_shift_pressed && record->event.pressed) {
+		unregister_code(KC_LSHIFT);
+		open_menu();
 		return false;
 	}
 

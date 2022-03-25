@@ -23,6 +23,8 @@
 #define WHI {  0,   0, 255} // #FFFFFF
 #define VIO {205, 255, 255} // #C600FF
 
+static HSV C_ORANGE = ORG;
+
 /*
 	LED layout:
 
@@ -58,7 +60,7 @@ const uint8_t PROGMEM ledmap[][DRIVER_LED_TOTAL][3] = {
 /**
  * Returns the index for a led respective to matrix row and column.
  */
-uint8_t led_index_from_row_and_col(uint8_t row, uint8_t col)
+uint8_t led_index_from_row_col(uint8_t row, uint8_t col)
 {
 	uint8_t index[8];
 	uint8_t count = rgb_matrix_map_row_column_to_led(row, col, index);
@@ -113,5 +115,37 @@ uint8_t led_index_from_pos(uint8_t layout_row, uint8_t layout_col) {
 		row += 6;
 	}
 
-	return led_index_from_row_and_col(row, col);
+	return led_index_from_row_col(row, col);
+}
+
+void clear_led_matrix(void)
+{
+	for (int i = 0; i < DRIVER_LED_TOTAL; i++)
+	{
+		rgb_matrix_set_color(i, 0, 0, 0);
+	}
+}
+
+bool led_set_by_row_col_hsv(uint8_t row, uint8_t col, HSV hsv)
+{
+	uint8_t index = led_index_from_row_col(row, col);
+	if (index != NO_LED) {
+		float f = (float)rgb_matrix_config.hsv.v / UINT8_MAX;
+		RGB rgb = hsv_to_rgb(hsv);
+		rgb_matrix_set_color(index, f * rgb.r, f * rgb.g, f * rgb.b);
+		return true;
+	}
+	return false;
+}
+
+bool led_set_by_pos_hsv(uint8_t row, uint8_t col, HSV hsv)
+{
+	uint8_t index = led_index_from_pos(row, col);
+	if (index != NO_LED) {
+		float f = (float)rgb_matrix_config.hsv.v / UINT8_MAX;
+		RGB rgb = hsv_to_rgb(hsv);
+		rgb_matrix_set_color(index, f * rgb.r, f * rgb.g, f * rgb.b);
+		return true;
+	}
+	return false;
 }

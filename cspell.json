@@ -5,6 +5,7 @@
 		"biton",
 		"consts",
 		"deps",
+		"leds",
 		"PSCREEN",
 		"uprintf"
 	],
