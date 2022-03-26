@@ -16,10 +16,12 @@ typedef struct overlay_t {
 } overlay_t;
 
 static overlay_t current_overlay = { 0 };
+static bool current_overlay_skip_not_pressed = false;
 
 void open_overlay(overlay_t overlay)
 {
 	current_overlay = overlay;
+	current_overlay_skip_not_pressed = true;
 }
 
 void close_overlay(void)

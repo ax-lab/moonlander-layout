@@ -1,6 +1,5 @@
 #include "moonlander.h"
 #include "version.h"
-#include "print.h"
 
 #ifdef CONSOLE_ENABLE
 	#define ENABLE_OUTPUT 1
@@ -15,9 +14,12 @@
 	#define output(...) (void)0
 #endif
 
+#include "util.h"
+
 #include "leds.h"
 #include "overlay.h"
 
+#include "overlay_pong.h"
 #include "overlay_rainbow.h"
 #include "overlay_simple_snake.h"
 #include "overlay_menu.h"
@@ -293,12 +295,20 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record)
 		record->event.time, record->tap.interrupted, record->tap.count);
 
 	if (current_overlay.process != NULL) {
+		if (!record->event.pressed && current_overlay_skip_not_pressed) {
+			current_overlay_skip_not_pressed = false;
+			return false;
+		} else {
+			current_overlay_skip_not_pressed = false;
+		}
 		return current_overlay.process(keycode, record);
 	}
 
-	if (record->event.key.col == 0 && record->event.key.row == 6 && is_shift_pressed && record->event.pressed) {
+	if (record->event.key.col == 0 && record->event.key.row == 6 && is_shift_pressed) {
 		unregister_code(KC_LSHIFT);
-		open_menu();
+		if (!record->event.pressed) {
+			open_menu();
+		}
 		return false;
 	}
 
