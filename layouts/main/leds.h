@@ -23,7 +23,9 @@
 #define WHI {  0,   0, 255} // #FFFFFF
 #define VIO {205, 255, 255} // #C600FF
 
+static HSV C_WHITE  = WHI;
 static HSV C_RED    = RED;
+static HSV C_GREEN  = GRN;
 static HSV C_ORANGE = ORG;
 static HSV C_YELLOW = YLW;
 

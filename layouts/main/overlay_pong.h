@@ -6,27 +6,37 @@
 #define PONG_W ((double)PONG_COLS)
 #define PONG_H ((double)PONG_ROWS)
 
-#define PONG_BALL_SIZE      1.5
+#define PONG_MAX_SCORE 5
+
+#define PONG_BALL_SIZE      1.0
 #define PONG_BALL_HUE       85
 #define PONG_BALL_SPEED     0.06
 #define PONG_BALL_SPEED_MAX 0.20
 
-#define PONG_PAD_SIZE 1.5
+#define PONG_PAD_SIZE 1.3
 #define PONG_PAD_HUE  201
 #define PONG_PAD_SPEED_PLAYER 0.03
-#define PONG_PAD_SPEED_CPU    0.03
+#define PONG_PAD_SPEED_CPU    0.02
 #define PONG_PAD_ALIGN_GRID   false
 
 #define PONG_SERVE_DELAY 500
 #define PONG_CPU_RETURNS_TO_MIDDLE false
+#define PONG_CPU_VIEW_DISTANCE (PONG_W / 3)
 
 #define PONG_MAX_X ((PONG_W / 2) - PONG_BALL_SIZE / 2)
 #define PONG_MIN_X (-PONG_MAX_X)
 #define PONG_MAX_Y ((PONG_H / 2) - PONG_BALL_SIZE / 2)
 #define PONG_MIN_Y (-PONG_MAX_Y)
 
-#define PONG_COUNTDOWN 3700
+#define PONG_COUNTDOWN 2900
 #define PONG_COUNTDOWN_FLASH_ACTIVE 700
+#define PONG_SCORE_DURATION 2000
+#define PONG_GAME_OVER_DURATION 5000
+
+#define PONG_COLOR_COUNTDOWN C_YELLOW
+#define PONG_COLOR_SCORE     C_WHITE
+#define PONG_COLOR_WINNER    C_GREEN
+#define PONG_COLOR_LOSER     C_WHITE
 
 
 typedef enum {
@@ -63,6 +73,7 @@ static struct {
 
 void pong_move_pad(vec_t *player, double direction, double speed);
 void pong_cpu_tick(vec_t *player);
+void pong_collide_pad(vec_t *player);
 bool pong_reflect_value(double *v, double min, double max);
 void pong_draw_board(void);
 void pong_draw_digit(HSV color, int digit, bool p1, bool p2);
@@ -88,9 +99,9 @@ void pong_overlay_rgb(void)
 			pong.state = rand() % 2 ? PONG_SERVE_P1 : PONG_SERVE_P2;
 		} else {
 			uint32_t countdown = start_at - now;
-			bool show_digit = countdown >= 1000 && (countdown % 1000) < PONG_COUNTDOWN_FLASH_ACTIVE;
+			bool show_digit = countdown >= 200 && (countdown % 1000) < PONG_COUNTDOWN_FLASH_ACTIVE;
 			if (show_digit) {
-				pong_draw_digit(C_YELLOW, countdown / 1000, true, true);
+				pong_draw_digit(PONG_COLOR_COUNTDOWN, (countdown / 1000) + 1, true, true);
 			}
 		}
 		break;
@@ -131,8 +142,17 @@ void pong_overlay_rgb(void)
 			pong.start += PONG_TICK;
 			pong.ball_pos = vec_add(pong.ball_pos, pong.ball_speed);
 			if (pong_reflect_value(&pong.ball_pos.x, PONG_MIN_X, PONG_MAX_X)) {
-				pong.ball_speed.x *= -1;
+				pong.start = now;
+				if (pong.ball_pos.x < 0) {
+					pong.score_p2++;
+					pong.state = pong.score_p2 < PONG_MAX_SCORE ? PONG_SCORE_P2 : PONG_GAME_OVER;
+				} else {
+					pong.score_p1++;
+					pong.state = pong.score_p1 < PONG_MAX_SCORE ? PONG_SCORE_P1 : PONG_GAME_OVER;
+				}
+				break;
 			}
+
 			if (pong_reflect_value(&pong.ball_pos.y, PONG_MIN_Y, PONG_MAX_Y)) {
 				pong.ball_speed.y *= -1;
 			}
@@ -143,6 +163,9 @@ void pong_overlay_rgb(void)
 			if (pong.is_cpu_p2) {
 				pong_cpu_tick(&pong.p2_pos);
 			}
+
+			pong_collide_pad(&pong.p1_pos);
+			pong_collide_pad(&pong.p2_pos);
 		}
 
 		pong_draw_board();
@@ -150,11 +173,41 @@ void pong_overlay_rgb(void)
 	}
 
 	case PONG_SCORE_P1:
+	case PONG_SCORE_P2: {
+		uint32_t delta = now - pong.start;
+		bool is_p1 = pong.state == PONG_SCORE_P1;
+		bool is_p2 = !is_p1;
+
+		if (delta >= PONG_SCORE_DURATION) {
+			pong.start = now;
+			pong.state = is_p1 ? PONG_SERVE_P1 : PONG_SERVE_P2;
+		} else if (delta < 250) {
+			pong_draw_board();
+		} else if (delta > 500) {
+			bool flash = (delta / 250) % 2 == 0 || delta > (PONG_SCORE_DURATION - 500);
+			bool score_p1 = (is_p1 && flash) || is_p2;
+			bool score_p2 = (is_p2 && flash) || is_p1;
+			pong_draw_digit(PONG_COLOR_SCORE, pong.score_p1, score_p1, false);
+			pong_draw_digit(PONG_COLOR_SCORE, pong.score_p2, false, score_p2);
+		}
+
 		break;
-	case PONG_SCORE_P2:
+	}
+
+	case PONG_GAME_OVER: {
+		uint32_t delta = now - pong.start;
+		if (delta >= PONG_GAME_OVER_DURATION) {
+			pong.start = now;
+			pong.state = PONG_START;
+			pong.score_p1 = pong.score_p2 = 0;
+		} else if (delta > 250) {
+			bool flash = (delta / 250) % 2 == 1 || delta > 1500;
+			pong_draw_digit(PONG_COLOR_WINNER, pong.score_p1, flash, false);
+			pong_draw_digit(PONG_COLOR_LOSER, pong.score_p2, false, flash);
+		}
 		break;
-	case PONG_GAME_OVER:
-		break;
+	}
+
 	}
 }
 
@@ -191,16 +244,22 @@ void pong_move_pad(vec_t *player, double direction, double speed)
 	player->y = pos;
 }
 
-void pong_cpu_tick(vec_t *player)
+bool pong_is_ball_moving_towards(vec_t *player)
 {
-	const double cpu_view_distance = PONG_W / 2;
-	const double distance_margin = PONG_PAD_SIZE / 4;
-	const double speed = PONG_PAD_SPEED_CPU;
-	const double return_speed = speed / 2;
-
 	double ball_distance = player->x - pong.ball_pos.x;
 	bool ball_is_coming = signbit(pong.ball_speed.x) == signbit(ball_distance);
-	ball_is_coming = ball_is_coming && fabs(ball_distance) <= cpu_view_distance;
+	return ball_is_coming;
+}
+
+void pong_cpu_tick(vec_t *player)
+{
+	const double distance_margin = PONG_PAD_SIZE / 4;
+	const double speed = PONG_PAD_SPEED_CPU;
+	const double return_speed = speed / 6;
+
+	double ball_distance = player->x - pong.ball_pos.x;
+	bool ball_is_coming = pong_is_ball_moving_towards(player);
+	ball_is_coming = ball_is_coming && fabs(ball_distance) <= PONG_CPU_VIEW_DISTANCE;
 
 	if (ball_is_coming) {
 		const double ball_offset = pong.ball_pos.y - player->y;
@@ -256,6 +315,28 @@ double pong_collision(vec_t pos_a, double size_a, vec_t pos_b, double size_b)
 	double dy = pong_collision_1d(pos_a.y, size_a, pos_b.y, size_b);
 	double res = dx * dy;
 	return res < EPSILON ? 0 : res;
+}
+
+void pong_collide_pad(vec_t *player)
+{
+	double dist = fabs(player->x - pong.ball_pos.x);
+	if (dist > PONG_BALL_SIZE / 2) {
+		return;
+	}
+	if (!pong_is_ball_moving_towards(player)) {
+		return;
+	}
+
+	double offset = pong_collision_1d(player->y, PONG_PAD_SIZE, pong.ball_pos.y, PONG_BALL_SIZE);
+	if (offset < EPSILON) {
+		return;
+	}
+
+	if (player->x < 0) {
+		pong.ball_speed.x = +fabs(pong.ball_speed.x);
+	} else {
+		pong.ball_speed.x = -fabs(pong.ball_speed.x);
+	}
 }
 
 uint8_t pong_area_to_hsv_value(double area)
