@@ -6,10 +6,19 @@
 #define PONG_W ((double)PONG_COLS)
 #define PONG_H ((double)PONG_ROWS)
 
-#define PONG_BALL_SIZE   1.5
-#define PONG_BALL_SPEED  0.04
+#define PONG_BALL_SIZE      1.5
+#define PONG_BALL_HUE       85
+#define PONG_BALL_SPEED     0.06
+#define PONG_BALL_SPEED_MAX 0.20
+
+#define PONG_PAD_SIZE 1.5
+#define PONG_PAD_HUE  201
+#define PONG_PAD_SPEED_PLAYER 0.03
+#define PONG_PAD_SPEED_CPU    0.03
+#define PONG_PAD_ALIGN_GRID   false
+
 #define PONG_SERVE_DELAY 500
-#define PONG_BALL_HUE    85
+#define PONG_CPU_RETURNS_TO_MIDDLE false
 
 #define PONG_MAX_X ((PONG_W / 2) - PONG_BALL_SIZE / 2)
 #define PONG_MIN_X (-PONG_MAX_X)
@@ -52,6 +61,8 @@ static struct {
 	bool key_p2_dn;
 } pong = { 0 };
 
+void pong_move_pad(vec_t *player, double direction, double speed);
+void pong_cpu_tick(vec_t *player);
 bool pong_reflect_value(double *v, double min, double max);
 void pong_draw_board(void);
 void pong_draw_digit(HSV color, int digit, bool p1, bool p2);
@@ -89,14 +100,23 @@ void pong_overlay_rgb(void)
 	case PONG_SERVE_P2: {
 		bool is_p1 = pong.state == PONG_SERVE_P1;
 		bool is_cpu = (is_p1 && pong.is_cpu_p1) || (!is_p1 && pong.is_cpu_p2);
+
 		pong.ball_pos.y = 0;
 		pong.ball_pos.x = ((PONG_W / 2) - 1.5) * (is_p1 ? -1 : +1);
 		pong.ball_speed = vec_zero();
+
+		pong.p1_pos.x = -(PONG_W / 2 - 0.5);
+		pong.p1_pos.y = 0;
+
+		pong.p2_pos.x = +(PONG_W / 2 - 0.5);
+		pong.p2_pos.y = 0;
+
 		if (is_cpu && (now - pong.start) >= PONG_SERVE_DELAY) {
+			const double speed_vertical_bias = 1.25;
 			pong.start = now;
 			pong.state = PONG_PLAYING;
 			pong.ball_speed.x = is_p1 ? +1 : -1;
-			pong.ball_speed.y = 3 * random_double() - 1.5;
+			pong.ball_speed.y = 2 * speed_vertical_bias * random_double() - speed_vertical_bias;
 			pong.ball_speed = vec_scale(vec_norm(pong.ball_speed), PONG_BALL_SPEED);
 		}
 
@@ -115,6 +135,13 @@ void pong_overlay_rgb(void)
 			}
 			if (pong_reflect_value(&pong.ball_pos.y, PONG_MIN_Y, PONG_MAX_Y)) {
 				pong.ball_speed.y *= -1;
+			}
+
+			if (pong.is_cpu_p1) {
+				pong_cpu_tick(&pong.p1_pos);
+			}
+			if (pong.is_cpu_p2) {
+				pong_cpu_tick(&pong.p2_pos);
 			}
 		}
 
@@ -150,6 +177,49 @@ void open_pong(void)
 //----------------------------------------------------------------------------//
 // Helpers
 //----------------------------------------------------------------------------//
+
+void pong_move_pad(vec_t *player, double direction, double speed)
+{
+	const double max = (PONG_H - PONG_PAD_SIZE) / 2;
+	const double min = -max;
+	double pos = player->y;
+	if (direction < 0) {
+		pos = fmax(min, pos - speed);
+	} else if (direction > 0) {
+		pos = fmin(max, pos + speed);
+	}
+	player->y = pos;
+}
+
+void pong_cpu_tick(vec_t *player)
+{
+	const double cpu_view_distance = PONG_W / 2;
+	const double distance_margin = PONG_PAD_SIZE / 4;
+	const double speed = PONG_PAD_SPEED_CPU;
+	const double return_speed = speed / 2;
+
+	double ball_distance = player->x - pong.ball_pos.x;
+	bool ball_is_coming = signbit(pong.ball_speed.x) == signbit(ball_distance);
+	ball_is_coming = ball_is_coming && fabs(ball_distance) <= cpu_view_distance;
+
+	if (ball_is_coming) {
+		const double ball_offset = pong.ball_pos.y - player->y;
+		if (ball_offset > distance_margin) {
+			pong_move_pad(player, +1, speed);
+		} else if (ball_offset < -distance_margin) {
+			pong_move_pad(player, -1, speed);
+		}
+	} else if (PONG_CPU_RETURNS_TO_MIDDLE) {
+		const double middle_offset = -player->y;
+		if (middle_offset > return_speed) {
+			pong_move_pad(player, +1, return_speed);
+		} else if (middle_offset < -return_speed) {
+			pong_move_pad(player, -1, return_speed);
+		} else {
+			player->y = 0;
+		}
+	}
+}
 
 bool pong_reflect_value(double *v, double min, double max)
 {
@@ -188,6 +258,25 @@ double pong_collision(vec_t pos_a, double size_a, vec_t pos_b, double size_b)
 	return res < EPSILON ? 0 : res;
 }
 
+uint8_t pong_area_to_hsv_value(double area)
+{
+	return fmin(ceil(area * (double)0xFF), 0xFF);
+}
+
+void pong_draw_pad(uint8_t row, uint8_t col, vec_t xy, vec_t pad)
+{
+	double pad_dx = pong_collision_1d(xy.x, 1, pad.x, 1);
+	double pad_dy = pong_collision_1d(xy.y, 1, pad.y, PONG_PAD_SIZE);
+	double pad_area = pad_dx * pad_dy;
+	if (pad_area >= EPSILON) {
+		uint8_t pad_value = pong_area_to_hsv_value(pad_area);
+		if (pad_value > 0) {
+			HSV color = { PONG_PAD_HUE, 255, pad_value };
+			led_set_by_pos_hsv(row, col, color);
+		}
+	}
+}
+
 void pong_draw_board(void)
 {
 	for (uint8_t row = 0; row < PONG_ROWS; row++) {
@@ -195,12 +284,16 @@ void pong_draw_board(void)
 			double x = (double)col + 0.5 - PONG_W / 2;
 			double y = (double)row + 0.5 - PONG_H / 2;
 			vec_t xy = {x, y};
-			double area = pong_collision(pong.ball_pos, PONG_BALL_SIZE, xy, 1);
-			uint8_t value = fmin(ceil(area * (double)0xFF), 0xFF);
-			if (value > 0) {
-				HSV color = { PONG_BALL_HUE, 255, value };
+
+			double ball_area = pong_collision(pong.ball_pos, PONG_BALL_SIZE, xy, 1);
+			uint8_t ball_value = pong_area_to_hsv_value(ball_area);
+			if (ball_value > 0) {
+				HSV color = { PONG_BALL_HUE, 255, ball_value };
 				led_set_by_pos_hsv(row, col, color);
 			}
+
+			pong_draw_pad(row, col, xy, pong.p1_pos);
+			pong_draw_pad(row, col, xy, pong.p2_pos);
 		}
 	}
 }
