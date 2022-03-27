@@ -290,6 +290,10 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record)
 {
 	static bool is_shift_pressed = false;
 
+	if (keycode == KC_LSHIFT) {
+		is_shift_pressed = record->event.pressed;
+	}
+
 	output("KL: kc: 0x%04X, col: %u, row: %u, pressed: %b, time: %u, interrupt: %b, count: %u\n",
 		keycode, record->event.key.col, record->event.key.row, record->event.pressed,
 		record->event.time, record->tap.interrupted, record->tap.count);
@@ -304,7 +308,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record)
 		return current_overlay.process(keycode, record);
 	}
 
-	if (record->event.key.col == 0 && record->event.key.row == 6 && is_shift_pressed) {
+	if (record->event.key.col == 6 && record->event.key.row == 0 && is_shift_pressed) {
 		unregister_code(KC_LSHIFT);
 		if (!record->event.pressed) {
 			open_menu();
@@ -314,10 +318,6 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record)
 
 	switch (keycode)
 	{
-	case KC_LSHIFT:
-		is_shift_pressed = record->event.pressed;
-		break;
-
 	case RGB_SLD:
 		if (record->event.pressed)
 		{

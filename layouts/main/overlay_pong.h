@@ -21,7 +21,7 @@
 #define PONG_W ((double)PONG_COLS)
 #define PONG_H ((double)PONG_ROWS)
 
-#define PONG_MAX_SCORE 5
+#define PONG_MAX_SCORE 3
 
 #define PONG_BALL_SIZE      1.0
 #define PONG_BALL_HUE       85
@@ -56,6 +56,15 @@
 #define PONG_COLOR_WINNER    C_GREEN
 #define PONG_COLOR_LOSER     C_WHITE
 
+static bool pong_sound_muted = false;
+
+float pong_sound_hit_bat[][2]  = SONG(Q__NOTE(_C6));
+float pong_sound_hit_wall[][2] = SONG(Q__NOTE(_A2));
+float pong_sound_point[][2]    = SONG(H__NOTE(_A4), H__NOTE(_B4));
+float pong_sound_win[][2]      = SONG(
+	E__NOTE(_A5), E__NOTE(_B5), E__NOTE(_CS6), E__NOTE(_D6), E__NOTE(_E6), E__NOTE(_FS6), E__NOTE(_GS6), E__NOTE(_A6));
+
+#define PONG_PLAY(name) (!pong_sound_muted ? PLAY_SONG(pong_sound_ ## name) : (void)0)
 
 typedef enum {
 	PONG_START,
@@ -105,6 +114,13 @@ bool pong_overlay_process(uint16_t keycode, keyrecord_t *record)
 {
 	uint8_t col = record->event.key.col;
 	uint8_t row = record->event.key.row;
+
+	if (keycode == KC_M) {
+		if (record->event.pressed) {
+			pong_sound_muted = !pong_sound_muted;
+		}
+		return false;
+	}
 
 	bool *player_is_cpu_flag = 0;
 	pong_controls_t *controls = 0;
@@ -280,11 +296,17 @@ void pong_overlay_rgb(void)
 					pong.score_p1++;
 					pong.state = pong.score_p1 < PONG_MAX_SCORE ? PONG_SCORE_P1 : PONG_GAME_OVER;
 				}
+				if (pong.state == PONG_GAME_OVER) {
+					PONG_PLAY(win);
+				} else {
+					PONG_PLAY(point);
+				}
 				break;
 			}
 
 			if (pong_reflect_value(&pong.ball_pos.y, PONG_MIN_Y, PONG_MAX_Y)) {
 				pong.ball_speed.y *= -1;
+				PONG_PLAY(hit_wall);
 			}
 
 			if (pong.is_cpu_p1) {
@@ -502,6 +524,8 @@ void pong_collide_pad(vec_t *player)
 	if (offset < EPSILON) {
 		return;
 	}
+
+	PONG_PLAY(hit_bat);
 
 	double current_speed = vec_len(pong.ball_speed);
 	double collision_delta = (pong.ball_pos.y - player->y) / PONG_PAD_SIZE;
