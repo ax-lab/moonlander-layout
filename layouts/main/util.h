@@ -22,9 +22,14 @@ vec_t vec_zero(void) {
 	return res;
 }
 
+double vec_len(vec_t v)
+{
+	return sqrt(v.x * v.x + v.y * v.y);
+}
+
 vec_t vec_norm(vec_t v)
 {
-	double len = sqrt(v.x * v.x + v.y * v.y);
+	double len = vec_len(v);
 	if (len > 0.001) {
 		v.x /= len;
 		v.y /= len;
@@ -47,4 +52,9 @@ vec_t vec_add(vec_t a, vec_t b)
 	a.x += b.x;
 	a.y += b.y;
 	return a;
+}
+
+double vec_dot_prod(vec_t a, vec_t b)
+{
+	return a.x * b.x + a.y * b.y;
 }

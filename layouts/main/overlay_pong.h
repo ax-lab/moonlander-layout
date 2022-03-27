@@ -12,12 +12,15 @@
 #define PONG_BALL_HUE       85
 #define PONG_BALL_SPEED     0.06
 #define PONG_BALL_SPEED_MAX 0.20
+#define PONG_BALL_ACCELERATION 1.09
 
-#define PONG_PAD_SIZE 1.3
+#define PONG_PAD_SIZE 1.5
 #define PONG_PAD_HUE  201
 #define PONG_PAD_SPEED_PLAYER 0.03
 #define PONG_PAD_SPEED_CPU    0.02
 #define PONG_PAD_ALIGN_GRID   false
+
+#define PONG_PAD_ANGLE (M_PI / 8)
 
 #define PONG_SERVE_DELAY 500
 #define PONG_CPU_RETURNS_TO_MIDDLE false
@@ -319,6 +322,8 @@ double pong_collision(vec_t pos_a, double size_a, vec_t pos_b, double size_b)
 
 void pong_collide_pad(vec_t *player)
 {
+	bool is_p1 = player->x < 0;
+
 	double dist = fabs(player->x - pong.ball_pos.x);
 	if (dist > PONG_BALL_SIZE / 2) {
 		return;
@@ -332,11 +337,41 @@ void pong_collide_pad(vec_t *player)
 		return;
 	}
 
-	if (player->x < 0) {
-		pong.ball_speed.x = +fabs(pong.ball_speed.x);
-	} else {
-		pong.ball_speed.x = -fabs(pong.ball_speed.x);
+	double current_speed = vec_len(pong.ball_speed);
+	double collision_delta = (pong.ball_pos.y - player->y) / PONG_PAD_SIZE;
+
+	double collision_angle = PONG_PAD_ANGLE * collision_delta;
+	vec_t collision_normal = { cos(collision_angle), sin(collision_angle) };
+	if (!is_p1) {
+		collision_normal.x *= -1;
 	}
+
+	vec_t inbound = vec_norm(pong.ball_speed);
+	vec_t reflected = vec_add(inbound, vec_scale(collision_normal, -2 * vec_dot_prod(inbound, collision_normal)));
+
+	vec_t reflected_speed = vec_scale(vec_norm(reflected), current_speed);
+
+	// accelerating only on the horizontal axis counteracts any vertical
+	// tendency acquired by the ball, at the cost of a somewhat random
+	// change in speed
+	reflected_speed.x *= PONG_BALL_ACCELERATION;
+
+	// we want to avoid generating vertical speeds, which can easily happen
+	// if the pad arc angle is big, but can still happen even with lesser
+	// angles
+	const double min_horizontal_component = 0.05;
+	if (is_p1) {
+		reflected_speed.x = fmax(reflected_speed.x, +min_horizontal_component);
+	} else {
+		reflected_speed.x = fmin(reflected_speed.x, -min_horizontal_component);
+	}
+
+	double new_speed = vec_len(reflected_speed);
+	if (new_speed > PONG_BALL_SPEED_MAX) {
+		reflected_speed = vec_scale(vec_norm(reflected_speed), PONG_BALL_SPEED_MAX);
+	}
+
+	pong.ball_speed = reflected_speed;
 }
 
 uint8_t pong_area_to_hsv_value(double area)
