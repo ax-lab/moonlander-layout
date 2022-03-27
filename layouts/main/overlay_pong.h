@@ -204,9 +204,12 @@ void pong_overlay_rgb(void)
 			pong.state = PONG_START;
 			pong.score_p1 = pong.score_p2 = 0;
 		} else if (delta > 250) {
+			bool p1_win = pong.score_p1 > pong.score_p2;
 			bool flash = (delta / 250) % 2 == 1 || delta > 1500;
-			pong_draw_digit(PONG_COLOR_WINNER, pong.score_p1, flash, false);
-			pong_draw_digit(PONG_COLOR_LOSER, pong.score_p2, false, flash);
+			HSV p1 = p1_win ? PONG_COLOR_WINNER : PONG_COLOR_LOSER;
+			HSV p2 = p1_win ? PONG_COLOR_LOSER : PONG_COLOR_WINNER;
+			pong_draw_digit(p1, pong.score_p1, flash, false);
+			pong_draw_digit(p2, pong.score_p2, false, flash);
 		}
 		break;
 	}
