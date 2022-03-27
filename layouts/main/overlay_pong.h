@@ -1,5 +1,20 @@
 #pragma once
 
+#define PONG_CONTROL_P1_ROW 5
+#define PONG_CONTROL_P2_ROW 11
+
+#define PONG_CONTROL_P1_UP    0
+#define PONG_CONTROL_P1_DOWN  1
+#define PONG_CONTROL_P1_SERVE 2
+
+#define PONG_CONTROL_P2_UP    6
+#define PONG_CONTROL_P2_DOWN  5
+#define PONG_CONTROL_P2_SERVE 4
+
+#define PONG_CONTROL_QUIT  3
+
+#define PONG_CONTROL_COLOR C_PINK
+
 #define PONG_TICK 10
 #define PONG_ROWS (LAYOUT_ROWS - 1)
 #define PONG_COLS (LAYOUT_COLS)
@@ -32,7 +47,7 @@
 #define PONG_MIN_Y (-PONG_MAX_Y)
 
 #define PONG_COUNTDOWN 2900
-#define PONG_COUNTDOWN_FLASH_ACTIVE 700
+#define PONG_COUNTDOWN_FLASH_ACTIVE 1000
 #define PONG_SCORE_DURATION 2000
 #define PONG_GAME_OVER_DURATION 5000
 
@@ -52,6 +67,12 @@ typedef enum {
 	PONG_GAME_OVER,
 } pong_state_t;
 
+typedef struct {
+	bool up;
+	bool down;
+	bool serve;
+} pong_controls_t;
+
 static struct {
 	vec_t ball_pos;
 	vec_t ball_speed;
@@ -59,6 +80,7 @@ static struct {
 	vec_t p2_pos;
 
 	uint32_t start;
+	uint32_t input_timer;
 
 	uint8_t score_p1;
 	uint8_t score_p2;
@@ -68,10 +90,8 @@ static struct {
 	bool is_cpu_p1;
 	bool is_cpu_p2;
 
-	bool key_p1_up;
-	bool key_p1_dn;
-	bool key_p2_up;
-	bool key_p2_dn;
+	pong_controls_t controls_p1;
+	pong_controls_t controls_p2;
 } pong = { 0 };
 
 void pong_move_pad(vec_t *player, double direction, double speed);
@@ -83,7 +103,47 @@ void pong_draw_digit(HSV color, int digit, bool p1, bool p2);
 
 bool pong_overlay_process(uint16_t keycode, keyrecord_t *record)
 {
-	close_overlay();
+	uint8_t col = record->event.key.col;
+	uint8_t row = record->event.key.row;
+
+	bool *player_is_cpu_flag = 0;
+	pong_controls_t *controls = 0;
+	if (row == PONG_CONTROL_P1_ROW) {
+		player_is_cpu_flag = &pong.is_cpu_p1;
+		controls = &pong.controls_p1;
+	} else if (row == PONG_CONTROL_P2_ROW) {
+		player_is_cpu_flag = &pong.is_cpu_p2;
+		controls = &pong.controls_p2;
+	}
+
+	if (player_is_cpu_flag) {
+		bool is_cpu = *player_is_cpu_flag;
+		bool pressed = record->event.pressed;
+		switch (col) {
+			case PONG_CONTROL_P1_UP:
+			case PONG_CONTROL_P2_UP:
+				is_cpu = false;
+				controls->up = pressed;
+				break;
+			case PONG_CONTROL_P1_DOWN:
+			case PONG_CONTROL_P2_DOWN:
+				is_cpu = false;
+				controls->down = pressed;
+				break;
+			case PONG_CONTROL_P1_SERVE:
+			case PONG_CONTROL_P2_SERVE:
+				is_cpu = false;
+				controls->serve = pressed;
+				break;
+			case PONG_CONTROL_QUIT:
+				is_cpu = true;
+				break;
+		}
+		*player_is_cpu_flag = is_cpu;
+	} else {
+		close_overlay();
+	}
+
 	return false;
 }
 
@@ -92,6 +152,55 @@ void pong_overlay_rgb(void)
 	clear_led_matrix();
 
 	uint32_t now = timer_read32();
+
+	bool enable_input_flash = false;
+	uint8_t flash_controls_fade = 0;
+
+	uint32_t delay = now - pong.start;
+	const double ramp_up = 0.25;
+	const double time_on = 0.50;
+	const double time_dn = 0.10;
+	const uint32_t phase_time = 500;
+	double phase = (double)(delay % phase_time) / phase_time;
+	double flash = 0;
+	if (phase <= ramp_up) {
+		flash = phase / ramp_up;
+	} else if (phase <= ramp_up + time_on) {
+		flash = 1;
+	} else if (phase <= ramp_up + time_on + time_dn) {
+		double pos = phase - ramp_up - time_on;
+		flash = (time_dn - pos) / time_dn;
+	}
+	if (flash > EPSILON) {
+		flash_controls_fade = fmin(ceil(flash * 0xFF), 0xFF);
+	}
+
+	if (pong.input_timer == 0 || now - pong.input_timer > PONG_TICK * 5) {
+		pong.input_timer = now;
+	}
+
+	while (now - pong.input_timer > PONG_TICK) {
+		pong.input_timer += PONG_TICK;
+		if (pong.state != PONG_PLAYING && pong.state != PONG_SERVE_P1 && pong.state != PONG_SERVE_P2) {
+			continue;
+		}
+		if (!pong.is_cpu_p1) {
+			if (pong.controls_p1.up) {
+				pong_move_pad(&pong.p1_pos, -1, PONG_PAD_SPEED_PLAYER);
+			}
+			if (pong.controls_p1.down) {
+				pong_move_pad(&pong.p1_pos, +1, PONG_PAD_SPEED_PLAYER);
+			}
+		}
+		if (!pong.is_cpu_p2) {
+			if (pong.controls_p2.up) {
+				pong_move_pad(&pong.p2_pos, -1, PONG_PAD_SPEED_PLAYER);
+			}
+			if (pong.controls_p2.down) {
+				pong_move_pad(&pong.p2_pos, +1, PONG_PAD_SPEED_PLAYER);
+			}
+		}
+	}
 
 	switch (pong.state) {
 
@@ -106,31 +215,49 @@ void pong_overlay_rgb(void)
 			if (show_digit) {
 				pong_draw_digit(PONG_COLOR_COUNTDOWN, (countdown / 1000) + 1, true, true);
 			}
+			enable_input_flash = true;
 		}
 		break;
 	}
 
 	case PONG_SERVE_P1:
 	case PONG_SERVE_P2: {
+		uint32_t delay = now - pong.start;
+
 		bool is_p1 = pong.state == PONG_SERVE_P1;
-		bool is_cpu = (is_p1 && pong.is_cpu_p1) || (!is_p1 && pong.is_cpu_p2);
+		bool is_p2 = !is_p1;
+		bool is_cpu = (is_p1 && pong.is_cpu_p1) || (is_p2 && pong.is_cpu_p2);
 
 		pong.ball_pos.y = 0;
 		pong.ball_pos.x = ((PONG_W / 2) - 1.5) * (is_p1 ? -1 : +1);
 		pong.ball_speed = vec_zero();
 
-		pong.p1_pos.x = -(PONG_W / 2 - 0.5);
-		pong.p1_pos.y = 0;
+		if (delay < 100) {
+			pong.p1_pos.x = -(PONG_W / 2 - 0.5);
+			pong.p1_pos.y = 0;
+			pong.p2_pos.x = +(PONG_W / 2 - 0.5);
+			pong.p2_pos.y = 0;
+		}
 
-		pong.p2_pos.x = +(PONG_W / 2 - 0.5);
-		pong.p2_pos.y = 0;
+		bool serve = is_cpu && delay >= PONG_SERVE_DELAY;
+		serve = serve || (!is_cpu && is_p1 && pong.controls_p1.serve);
+		serve = serve || (!is_cpu && is_p2 && pong.controls_p2.serve);
 
-		if (is_cpu && (now - pong.start) >= PONG_SERVE_DELAY) {
-			const double speed_vertical_bias = 1.25;
+		if (serve) {
 			pong.start = now;
 			pong.state = PONG_PLAYING;
 			pong.ball_speed.x = is_p1 ? +1 : -1;
-			pong.ball_speed.y = 2 * speed_vertical_bias * random_double() - speed_vertical_bias;
+
+			const double speed_vertical_bias = 1.25;
+			double vertical;
+			if (is_cpu) {
+				vertical = random_double() - 0.5;
+			} else {
+				double pos_y = is_p1 ? pong.p1_pos.y : pong.p2_pos.y;
+				vertical = -pos_y / PONG_H;
+			}
+
+			pong.ball_speed.y = 2 * speed_vertical_bias * vertical;
 			pong.ball_speed = vec_scale(vec_norm(pong.ball_speed), PONG_BALL_SPEED);
 		}
 
@@ -214,6 +341,42 @@ void pong_overlay_rgb(void)
 		break;
 	}
 
+	}
+
+	if (!pong.is_cpu_p1 || enable_input_flash) {
+		HSV c_keys = PONG_CONTROL_COLOR;
+		HSV c_quit = C_RED;
+		if (pong.is_cpu_p1) {
+			c_keys.v = flash_controls_fade;
+			c_quit.v = 0;
+		}
+		HSV c_serve = c_keys;
+		if (pong.state == PONG_SERVE_P1) {
+			c_serve.v = flash_controls_fade;
+		}
+		uint8_t row = PONG_CONTROL_P1_ROW;
+		led_set_by_row_col_hsv(row, PONG_CONTROL_P1_UP, c_keys);
+		led_set_by_row_col_hsv(row, PONG_CONTROL_P1_DOWN, c_keys);
+		led_set_by_row_col_hsv(row, PONG_CONTROL_P1_SERVE, c_serve);
+		led_set_by_row_col_hsv(row, PONG_CONTROL_QUIT, c_quit);
+	}
+
+	if (!pong.is_cpu_p2 || enable_input_flash) {
+		HSV c_keys = PONG_CONTROL_COLOR;
+		HSV c_quit = C_RED;
+		if (pong.is_cpu_p2) {
+			c_keys.v = flash_controls_fade;
+			c_quit.v = 0;
+		}
+		HSV c_serve = c_keys;
+		if (pong.state == PONG_SERVE_P2) {
+			c_serve.v = flash_controls_fade;
+		}
+		uint8_t row = PONG_CONTROL_P2_ROW;
+		led_set_by_row_col_hsv(row, PONG_CONTROL_P2_UP, c_keys);
+		led_set_by_row_col_hsv(row, PONG_CONTROL_P2_DOWN, c_keys);
+		led_set_by_row_col_hsv(row, PONG_CONTROL_P2_SERVE, c_serve);
+		led_set_by_row_col_hsv(row, PONG_CONTROL_QUIT, c_quit);
 	}
 }
 

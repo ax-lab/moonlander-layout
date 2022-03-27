@@ -25,6 +25,7 @@
 
 static HSV C_WHITE  = WHI;
 static HSV C_RED    = RED;
+static HSV C_PINK   = PNK;
 static HSV C_GREEN  = GRN;
 static HSV C_ORANGE = ORG;
 static HSV C_YELLOW = YLW;
