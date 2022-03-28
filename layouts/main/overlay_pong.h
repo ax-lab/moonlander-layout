@@ -2,14 +2,11 @@
 
 #define PONG_MAX_SCORE 3
 
-// Fixed time step for game physics and other time-related logic.
-#define PONG_TICK_MS   10
+// Matrix row and col for the player input keys
 
-// Keyboard rows for the player input keys
 #define PONG_CONTROL_P1_ROW 5
 #define PONG_CONTROL_P2_ROW 11
 
-// Keyboard columns for the player input keys
 #define PONG_CONTROL_P1_UP    0
 #define PONG_CONTROL_P1_DOWN  1
 #define PONG_CONTROL_P1_SERVE 2
@@ -20,6 +17,8 @@
 
 #define PONG_CONTROL_QUIT 3 // this has the same code on either side
 
+// Game colors
+
 #define PONG_BALL_HUE 85   // hsv hue for the ball (green)
 #define PONG_PAD_HUE  201  // hsv hue for the pad (violet)
 
@@ -29,6 +28,13 @@
 #define PONG_COLOR_WINNER    C_GREEN  // score color for the final winner
 #define PONG_COLOR_LOSER     C_WHITE  // score color for the loser
 
+// Game configuration
+
+#define PONG_TICK_MS   10  // Time step for game physics
+
+// NOTE: a distance of 1 is equivalent to the size of a key in the keyboard
+
+// Board size, based on the physical layout
 #define PONG_ROWS (LAYOUT_ROWS - 1)
 #define PONG_COLS (LAYOUT_COLS)
 #define PONG_W ((double)PONG_COLS)
@@ -42,21 +48,19 @@
 #define PONG_PAD_SIZE 1.5
 #define PONG_PAD_SPEED_PLAYER 0.03
 #define PONG_PAD_SPEED_CPU    0.02
-#define PONG_PAD_ALIGN_GRID   false
 
+// The virtual arc in the pad used when reflecting the ball
 #define PONG_PAD_ANGLE (M_PI / 8)
 
 #define PONG_SERVE_DELAY 500
 #define PONG_CPU_RETURNS_TO_MIDDLE false
 #define PONG_CPU_VIEW_DISTANCE (PONG_W / 3)
 
-#define PONG_MAX_X ((PONG_W / 2) - PONG_BALL_SIZE / 2)
-#define PONG_MIN_X (-PONG_MAX_X)
-#define PONG_MAX_Y ((PONG_H / 2) - PONG_BALL_SIZE / 2)
-#define PONG_MIN_Y (-PONG_MAX_Y)
+// Transition timings
 
+// This is less than 3000 to avoid flashing 4 (countdown is +1)
 #define PONG_COUNTDOWN 2900
-#define PONG_COUNTDOWN_FLASH_ACTIVE 1000
+#define PONG_COUNTDOWN_FLASH_ACTIVE 1000 // if less than 1000, countdown will flash black between numbers
 #define PONG_SCORE_DURATION 2000
 #define PONG_GAME_OVER_DURATION 5000
 
@@ -106,8 +110,8 @@ static struct pong_state_t {
 	vec_t ball_pos;
 	vec_t ball_speed;
 
-	// Position for the player pads. The `x` is fixed to the pad position on
-	// the game board.
+	// Position for the player pads. The `x` is fixed and the `y` is controlled
+	// by the player input or CPU.
 	vec_t p1_pos;
 	vec_t p2_pos;
 
@@ -141,6 +145,7 @@ void pong_set_state(pong_state_t new_state)
 	pong.state = new_state;
 	pong.base_timer = pong.game_timer;
 }
+
 
 //----[ Pong overlay ]--------------------------------------------------------//
 
@@ -197,7 +202,12 @@ bool pong_overlay_process(uint16_t keycode, keyrecord_t *record)
 }
 
 void pong_process_game_ticks(void);
-uint8_t pong_calc_input_led_flashing(void);
+void pong_update_input_leds(void);
+
+void pong_process_start_countdown(void);
+void pong_process_serve(void);
+void pong_show_score(void);
+void pong_show_final_score(void);
 
 // This is called by the main keyboard loop to set the RGB state for the
 // led matrix.
@@ -210,150 +220,33 @@ void pong_overlay_rgb(void)
 
 	// process player input, update game physics, and update `gamer_timer`
 	pong_process_game_ticks();
-	uint32_t now = pong.game_timer;
 
 	switch (pong.state) {
-
-		case PONG_START: {
-			uint32_t start_at = pong.base_timer + PONG_COUNTDOWN;
-			if (now >= start_at) {
-				pong_set_state(rand() % 2 ? PONG_SERVE_P1 : PONG_SERVE_P2);
-			} else {
-				uint32_t countdown = start_at - now;
-				bool show_digit = countdown >= 200 && (countdown % 1000) < PONG_COUNTDOWN_FLASH_ACTIVE;
-				if (show_digit) {
-					pong_draw_digit(PONG_COLOR_COUNTDOWN, (countdown / 1000) + 1, true, true);
-				}
-			}
+		case PONG_START:
+			pong_process_start_countdown();
 			break;
-		}
 
 		case PONG_SERVE_P1:
-		case PONG_SERVE_P2: {
-			uint32_t delay = now - pong.base_timer;
+		case PONG_SERVE_P2:
+			pong_process_serve();
+			break;
 
-			bool is_p1 = pong.state == PONG_SERVE_P1;
-			bool is_p2 = !is_p1;
-			bool is_cpu = (is_p1 && pong.controls_p1.is_cpu) || (is_p2 && pong.controls_p2.is_cpu);
-
-			pong.ball_pos.y = 0;
-			pong.ball_pos.x = ((PONG_W / 2) - 1.5) * (is_p1 ? -1 : +1);
-			pong.ball_speed = vec_zero();
-
-			if (delay < 100) {
-				pong.p1_pos.x = -(PONG_W / 2 - 0.5);
-				pong.p1_pos.y = 0;
-				pong.p2_pos.x = +(PONG_W / 2 - 0.5);
-				pong.p2_pos.y = 0;
-			}
-
-			bool serve = is_cpu && delay >= PONG_SERVE_DELAY;
-			serve = serve || (!is_cpu && is_p1 && pong.controls_p1.serve);
-			serve = serve || (!is_cpu && is_p2 && pong.controls_p2.serve);
-
-			if (serve) {
-				pong_set_state(PONG_PLAYING);
-				pong.ball_speed.x = is_p1 ? +1 : -1;
-
-				const double speed_vertical_bias = 1.25;
-				double vertical;
-				if (is_cpu) {
-					vertical = random_double() - 0.5;
-				} else {
-					double pos_y = is_p1 ? pong.p1_pos.y : pong.p2_pos.y;
-					vertical = -pos_y / PONG_H;
-				}
-
-				pong.ball_speed.y = 2 * speed_vertical_bias * vertical;
-				pong.ball_speed = vec_scale(vec_norm(pong.ball_speed), PONG_BALL_SPEED);
-			}
-
+		case PONG_PLAYING:
 			pong_draw_board();
 			break;
-		}
-
-		case PONG_PLAYING: {
-			pong_draw_board();
-			break;
-		}
 
 		case PONG_SCORE_P1:
-		case PONG_SCORE_P2: {
-			uint32_t delta = now - pong.base_timer;
-			bool is_p1 = pong.state == PONG_SCORE_P1;
-			bool is_p2 = !is_p1;
-
-			if (delta >= PONG_SCORE_DURATION) {
-				pong_set_state(is_p1 ? PONG_SERVE_P1 : PONG_SERVE_P2);
-			} else if (delta < 250) {
-				pong_draw_board();
-			} else if (delta > 500) {
-				bool flash = (delta / 250) % 2 == 0 || delta > (PONG_SCORE_DURATION - 500);
-				bool score_p1 = (is_p1 && flash) || is_p2;
-				bool score_p2 = (is_p2 && flash) || is_p1;
-				pong_draw_digit(PONG_COLOR_SCORE, pong.score_p1, score_p1, false);
-				pong_draw_digit(PONG_COLOR_SCORE, pong.score_p2, false, score_p2);
-			}
-
+		case PONG_SCORE_P2:
+			pong_show_score();
 			break;
-		}
 
 		case PONG_GAME_OVER: {
-			uint32_t delta = now - pong.base_timer;
-			if (delta >= PONG_GAME_OVER_DURATION) {
-				pong_set_state(PONG_START);
-				pong.score_p1 = pong.score_p2 = 0;
-			} else if (delta > 250) {
-				bool p1_win = pong.score_p1 > pong.score_p2;
-				bool flash = (delta / 250) % 2 == 1 || delta > 1500;
-				HSV p1 = p1_win ? PONG_COLOR_WINNER : PONG_COLOR_LOSER;
-				HSV p2 = p1_win ? PONG_COLOR_LOSER : PONG_COLOR_WINNER;
-				pong_draw_digit(p1, pong.score_p1, flash, false);
-				pong_draw_digit(p2, pong.score_p2, false, flash);
-			}
+			pong_show_final_score();
 			break;
 		}
-
 	}
 
-	bool flashing_input_controls = pong.state == PONG_START;
-	uint8_t input_controls_flash_intensity = pong_calc_input_led_flashing();
-
-	if (!pong.controls_p1.is_cpu || flashing_input_controls) {
-		HSV c_keys = PONG_COLOR_CONTROL;
-		HSV c_quit = C_RED;
-		if (pong.controls_p1.is_cpu) {
-			c_keys.v = input_controls_flash_intensity;
-			c_quit.v = 0;
-		}
-		HSV c_serve = c_keys;
-		if (pong.state == PONG_SERVE_P1) {
-			c_serve.v = input_controls_flash_intensity;
-		}
-		uint8_t row = PONG_CONTROL_P1_ROW;
-		led_set_by_row_col_hsv(row, PONG_CONTROL_P1_UP, c_keys);
-		led_set_by_row_col_hsv(row, PONG_CONTROL_P1_DOWN, c_keys);
-		led_set_by_row_col_hsv(row, PONG_CONTROL_P1_SERVE, c_serve);
-		led_set_by_row_col_hsv(row, PONG_CONTROL_QUIT, c_quit);
-	}
-
-	if (!pong.controls_p2.is_cpu || flashing_input_controls) {
-		HSV c_keys = PONG_COLOR_CONTROL;
-		HSV c_quit = C_RED;
-		if (pong.controls_p2.is_cpu) {
-			c_keys.v = input_controls_flash_intensity;
-			c_quit.v = 0;
-		}
-		HSV c_serve = c_keys;
-		if (pong.state == PONG_SERVE_P2) {
-			c_serve.v = input_controls_flash_intensity;
-		}
-		uint8_t row = PONG_CONTROL_P2_ROW;
-		led_set_by_row_col_hsv(row, PONG_CONTROL_P2_UP, c_keys);
-		led_set_by_row_col_hsv(row, PONG_CONTROL_P2_DOWN, c_keys);
-		led_set_by_row_col_hsv(row, PONG_CONTROL_P2_SERVE, c_serve);
-		led_set_by_row_col_hsv(row, PONG_CONTROL_QUIT, c_quit);
-	}
+	pong_update_input_leds();
 }
 
 static overlay_t pong_overlay = {
@@ -361,6 +254,7 @@ static overlay_t pong_overlay = {
 	.rgb = pong_overlay_rgb,
 };
 
+// This is called by the menu to open the overlay.
 void open_pong(void)
 {
 	zero(&pong);
@@ -375,10 +269,114 @@ void open_pong(void)
 	srand(pong.game_timer);
 }
 
-//----[ Game loop functions ]-------------------------------------------------//
+
+//----[ Game state processing functions ]-------------------------------------//
+
+void pong_process_start_countdown(void)
+{
+	uint32_t now = pong.game_timer;
+	uint32_t start_at = pong.base_timer + PONG_COUNTDOWN;
+	if (now >= start_at) {
+		pong_set_state(rand() % 2 ? PONG_SERVE_P1 : PONG_SERVE_P2);
+	} else {
+		uint32_t countdown = start_at - now;
+		bool show_digit = countdown >= 200 && (countdown % 1000) < PONG_COUNTDOWN_FLASH_ACTIVE;
+		if (show_digit) {
+			pong_draw_digit(PONG_COLOR_COUNTDOWN, (countdown / 1000) + 1, true, true);
+		}
+	}
+}
+
+void pong_process_serve(void)
+{
+	uint32_t delay = pong.game_timer - pong.base_timer;
+
+	bool is_p1 = pong.state == PONG_SERVE_P1;
+	bool is_p2 = !is_p1;
+	bool is_cpu = (is_p1 && pong.controls_p1.is_cpu) || (is_p2 && pong.controls_p2.is_cpu);
+
+	pong.ball_pos.y = 0;
+	pong.ball_pos.x = ((PONG_W / 2) - 1.5) * (is_p1 ? -1 : +1);
+	pong.ball_speed = vec_zero();
+
+	// return the ball to the serve position
+	if (delay < 100) {
+		pong.p1_pos.x = -(PONG_W / 2 - 0.5);
+		pong.p1_pos.y = 0;
+		pong.p2_pos.x = +(PONG_W / 2 - 0.5);
+		pong.p2_pos.y = 0;
+	}
+
+	bool serve = is_cpu && delay >= PONG_SERVE_DELAY;
+	serve = serve || (!is_cpu && is_p1 && pong.controls_p1.serve);
+	serve = serve || (!is_cpu && is_p2 && pong.controls_p2.serve);
+
+	if (serve) {
+		pong_set_state(PONG_PLAYING);
+		pong.ball_speed.x = is_p1 ? +1 : -1;
+
+		// makes it more likely that the CPU serve will come at an angle
+		const double speed_vertical_bias = 1.25;
+		double vertical;
+		if (is_cpu) {
+			vertical = random_double() - 0.5;
+		} else {
+			double pos_y = is_p1 ? pong.p1_pos.y : pong.p2_pos.y;
+			vertical = -pos_y / PONG_H;
+		}
+
+		pong.ball_speed.y = 2 * speed_vertical_bias * vertical;
+		pong.ball_speed = vec_scale(vec_norm(pong.ball_speed), PONG_BALL_SPEED);
+	}
+
+	pong_draw_board();
+}
+
+void pong_show_score(void)
+{
+	uint32_t delta = pong.game_timer - pong.base_timer;
+	bool is_p1 = pong.state == PONG_SCORE_P1;
+	bool is_p2 = !is_p1;
+
+	if (delta >= PONG_SCORE_DURATION) {
+		pong_set_state(is_p1 ? PONG_SERVE_P1 : PONG_SERVE_P2);
+	} else if (delta < 250) {
+		// show the frozen board for a moment before displaying the score
+		pong_draw_board();
+	} else if (delta > 500) {
+		// flash the digit that changed in the score
+		bool flash = (delta / 250) % 2 == 0 || delta > (PONG_SCORE_DURATION - 500);
+		bool score_p1 = (is_p1 && flash) || is_p2;
+		bool score_p2 = (is_p2 && flash) || is_p1;
+		pong_draw_digit(PONG_COLOR_SCORE, pong.score_p1, score_p1, false);
+		pong_draw_digit(PONG_COLOR_SCORE, pong.score_p2, false, score_p2);
+	}
+}
+
+void pong_show_final_score(void)
+{
+	uint32_t delta = pong.game_timer - pong.base_timer;
+	if (delta >= PONG_GAME_OVER_DURATION) {
+		pong_set_state(PONG_START);
+		pong.score_p1 = pong.score_p2 = 0;
+	} else if (delta > 250) {
+		// show the frozen board for a moment before showing the final score
+		bool p1_win = pong.score_p1 > pong.score_p2;
+
+		// flash the score when first showing it
+		bool flash = (delta / 250) % 2 == 1 || delta > 1500;
+		HSV p1 = p1_win ? PONG_COLOR_WINNER : PONG_COLOR_LOSER;
+		HSV p2 = p1_win ? PONG_COLOR_LOSER : PONG_COLOR_WINNER;
+		pong_draw_digit(p1, pong.score_p1, flash, false);
+		pong_draw_digit(p2, pong.score_p2, false, flash);
+	}
+}
+
+
+//----[ Game loop helper functions ]------------------------------------------//
 
 void pong_process_player_input_and_update_pads(void);
-void pong_cpu_tick(vec_t *player);
+void pong_process_cpu_player_tick(vec_t *player);
 void pong_move_pad(vec_t *player, double direction, double speed);
 void pong_collide_pad(vec_t *player);
 
@@ -386,10 +384,15 @@ void pong_collide_pad(vec_t *player);
 bool pong_reflect_value(double *v, double min, double max);
 double pong_collision(vec_t pos_a, double size_a, vec_t pos_b, double size_b);
 double pong_collision_1d(double pos_a, double size_a, double pos_b, double size_b);
-bool pong_is_ball_moving_towards(vec_t *player);
+bool pong_is_ball_moving_towards_player(vec_t *player);
 
 void pong_process_game_ticks()
 {
+	const double PONG_MAX_X = ((PONG_W / 2) - PONG_BALL_SIZE / 2);
+	const double PONG_MIN_X = (-PONG_MAX_X);
+	const double PONG_MAX_Y = ((PONG_H / 2) - PONG_BALL_SIZE / 2);
+	const double PONG_MIN_Y = (-PONG_MAX_Y);
+
 	uint32_t now = timer_read32();
 
 	// this is a safeguard to avoid processing too many ticks if for whatever
@@ -411,10 +414,10 @@ void pong_process_game_ticks()
 		}
 
 		if (pong.controls_p1.is_cpu) {
-			pong_cpu_tick(&pong.p1_pos);
+			pong_process_cpu_player_tick(&pong.p1_pos);
 		}
 		if (pong.controls_p2.is_cpu) {
-			pong_cpu_tick(&pong.p2_pos);
+			pong_process_cpu_player_tick(&pong.p2_pos);
 		}
 
 		pong.ball_pos = vec_add(pong.ball_pos, pong.ball_speed);
@@ -468,14 +471,14 @@ void pong_process_player_input_and_update_pads(void)
 	}
 }
 
-void pong_cpu_tick(vec_t *player)
+void pong_process_cpu_player_tick(vec_t *player)
 {
 	const double distance_margin = PONG_PAD_SIZE / 4;
 	const double speed = PONG_PAD_SPEED_CPU;
 	const double return_speed = speed / 6;
 
 	double ball_distance = player->x - pong.ball_pos.x;
-	bool ball_is_coming = pong_is_ball_moving_towards(player);
+	bool ball_is_coming = pong_is_ball_moving_towards_player(player);
 	ball_is_coming = ball_is_coming && fabs(ball_distance) <= PONG_CPU_VIEW_DISTANCE;
 
 	if (ball_is_coming) {
@@ -499,6 +502,8 @@ void pong_cpu_tick(vec_t *player)
 
 void pong_move_pad(vec_t *player, double direction, double speed)
 {
+	// note that this should be called only once inside a single game tick to
+	// keep the speed stable
 	const double max = (PONG_H - PONG_PAD_SIZE) / 2;
 	const double min = -max;
 	double pos = player->y;
@@ -518,7 +523,10 @@ void pong_collide_pad(vec_t *player)
 	if (dist > PONG_BALL_SIZE / 2) {
 		return;
 	}
-	if (!pong_is_ball_moving_towards(player)) {
+
+	// even if there is a collision, ignore if the ball is moving away from
+	// the pad
+	if (!pong_is_ball_moving_towards_player(player)) {
 		return;
 	}
 
@@ -532,6 +540,8 @@ void pong_collide_pad(vec_t *player)
 	double current_speed = vec_len(pong.ball_speed);
 	double collision_delta = (pong.ball_pos.y - player->y) / PONG_PAD_SIZE;
 
+	// use a virtual arc to return the ball at an angle depending on where it
+	// hit the pad
 	double collision_angle = PONG_PAD_ANGLE * collision_delta;
 	vec_t collision_normal = { cos(collision_angle), sin(collision_angle) };
 	if (!is_p1) {
@@ -543,14 +553,15 @@ void pong_collide_pad(vec_t *player)
 
 	vec_t reflected_speed = vec_scale(vec_norm(reflected), current_speed);
 
+	// apply a small acceleration on each hit
+	//
 	// accelerating only on the horizontal axis counteracts any vertical
-	// tendency acquired by the ball, at the cost of a somewhat random
-	// change in speed
+	// tendency acquired by the ball, at the cost of precision in the
+	// speed change
 	reflected_speed.x *= PONG_BALL_ACCELERATION;
 
-	// we want to avoid generating vertical speeds, which can easily happen
-	// if the pad arc angle is big, but can still happen even with lesser
-	// angles
+	// we want to avoid generating vertical speeds that would lock the ball
+	// between walls
 	const double min_horizontal_component = 0.05;
 	if (is_p1) {
 		reflected_speed.x = fmax(reflected_speed.x, +min_horizontal_component);
@@ -558,6 +569,7 @@ void pong_collide_pad(vec_t *player)
 		reflected_speed.x = fmin(reflected_speed.x, -min_horizontal_component);
 	}
 
+	// keep the maximum speed limit
 	double new_speed = vec_len(reflected_speed);
 	if (new_speed > PONG_BALL_SPEED_MAX) {
 		reflected_speed = vec_scale(vec_norm(reflected_speed), PONG_BALL_SPEED_MAX);
@@ -566,8 +578,11 @@ void pong_collide_pad(vec_t *player)
 	pong.ball_speed = reflected_speed;
 }
 
+
 //----[ Helper functions ]----------------------------------------------------//
 
+// Reflect a value to keep it between min and max. This is used for collision
+// processing.
 bool pong_reflect_value(double *v, double min, double max)
 {
 	if (*v < (min - EPSILON)) {
@@ -586,8 +601,8 @@ double pong_collision(vec_t pos_a, double size_a, vec_t pos_b, double size_b)
 {
 	double dx = pong_collision_1d(pos_a.x, size_a, pos_b.x, size_b);
 	double dy = pong_collision_1d(pos_a.y, size_a, pos_b.y, size_b);
-	double res = dx * dy;
-	return res < EPSILON ? 0 : res;
+	double collision_area = dx * dy;
+	return collision_area < EPSILON ? 0 : collision_area;
 }
 
 double pong_collision_1d(double pos_a, double size_a, double pos_b, double size_b)
@@ -601,18 +616,29 @@ double pong_collision_1d(double pos_a, double size_a, double pos_b, double size_
 	}
 	double p1 = fmax(a1, b1);
 	double p2 = fmin(a2, b2);
-	double overlap = p2 - p1;
-	return overlap < EPSILON ? 0 : overlap;
+	double collision_overlap = p2 - p1;
+	return collision_overlap < EPSILON ? 0 : collision_overlap;
 }
 
-bool pong_is_ball_moving_towards(vec_t *player)
+bool pong_is_ball_moving_towards_player(vec_t *player)
 {
 	double ball_distance = player->x - pong.ball_pos.x;
 	bool ball_is_coming = signbit(pong.ball_speed.x) == signbit(ball_distance);
 	return ball_is_coming;
 }
 
+
 //----[ Drawing functions ]---------------------------------------------------//
+
+uint8_t pong_calc_input_led_flashing(void);
+void pong_update_player_input(bool is_p1, pong_controls_t player, uint8_t flash_intensity);
+
+void pong_update_input_leds(void)
+{
+	uint8_t input_controls_flash_intensity = pong_calc_input_led_flashing();
+	pong_update_player_input(true, pong.controls_p1, input_controls_flash_intensity);
+	pong_update_player_input(false, pong.controls_p2, input_controls_flash_intensity);
+}
 
 uint8_t pong_calc_input_led_flashing()
 {
@@ -637,6 +663,42 @@ uint8_t pong_calc_input_led_flashing()
 		intensity = (fade_out - fade_out_phase) / fade_out;
 	}
 	return intensity > EPSILON ? fmin(ceil(intensity * 0xFF), 0xFF) : 0;
+}
+
+void pong_update_player_input(bool is_p1, pong_controls_t player, uint8_t flash_intensity)
+{
+	// the input leds are active if the player is controlling and when
+	// flashing the input controls
+	bool flashing_input_controls = pong.state == PONG_START;
+	if (!player.is_cpu || flashing_input_controls) {
+		HSV c_keys = PONG_COLOR_CONTROL;
+		HSV c_quit = C_RED;
+		if (player.is_cpu) {
+			// we are flashing the controls at the start
+			c_keys.v = flash_intensity;
+			c_quit.v = 0;
+		}
+
+		bool is_serving = pong.state == (is_p1 ? PONG_SERVE_P1 : PONG_SERVE_P2);
+		HSV c_serve = c_keys;
+		if (is_serving) {
+			// we also flash the serve key when the player is serving
+			c_serve.v = flash_intensity;
+		}
+		uint8_t row = is_p1 ? PONG_CONTROL_P1_ROW : PONG_CONTROL_P2_ROW;
+		led_set_by_row_col_hsv(row,
+			is_p1 ? PONG_CONTROL_P1_UP :PONG_CONTROL_P2_UP,
+			c_keys);
+		led_set_by_row_col_hsv(row,
+			is_p1 ? PONG_CONTROL_P1_DOWN :PONG_CONTROL_P2_DOWN,
+			c_keys);
+		led_set_by_row_col_hsv(row,
+			is_p1 ? PONG_CONTROL_P1_SERVE :PONG_CONTROL_P2_SERVE,
+			c_serve);
+		led_set_by_row_col_hsv(row,
+			is_p1 ? PONG_CONTROL_QUIT :PONG_CONTROL_QUIT,
+			c_quit);
+	}
 }
 
 uint8_t pong_area_to_hsv_value(double area)
