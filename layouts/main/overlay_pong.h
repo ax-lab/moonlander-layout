@@ -1,8 +1,13 @@
 #pragma once
 
+#define PONG_MAX_SCORE 3
+#define PONG_TICK_MS   10
+
+// Keyboard rows for the player input keys
 #define PONG_CONTROL_P1_ROW 5
 #define PONG_CONTROL_P2_ROW 11
 
+// Keyboard columns for the player input keys
 #define PONG_CONTROL_P1_UP    0
 #define PONG_CONTROL_P1_DOWN  1
 #define PONG_CONTROL_P1_SERVE 2
@@ -11,26 +16,29 @@
 #define PONG_CONTROL_P2_DOWN  5
 #define PONG_CONTROL_P2_SERVE 4
 
-#define PONG_CONTROL_QUIT  3
+#define PONG_CONTROL_QUIT 3 // this has the same code on either side
 
-#define PONG_CONTROL_COLOR C_PINK
+#define PONG_BALL_HUE 85   // hsv hue for the ball (green)
+#define PONG_PAD_HUE  201  // hsv hue for the pad (violet)
 
-#define PONG_TICK 10
+#define PONG_COLOR_CONTROL   C_PINK   // led color for player input keys
+#define PONG_COLOR_COUNTDOWN C_YELLOW // color for the start countdown digits
+#define PONG_COLOR_SCORE     C_WHITE  // color for the score digits
+#define PONG_COLOR_WINNER    C_GREEN  // score color for the final winner
+#define PONG_COLOR_LOSER     C_WHITE  // score color for the loser
+
 #define PONG_ROWS (LAYOUT_ROWS - 1)
 #define PONG_COLS (LAYOUT_COLS)
 #define PONG_W ((double)PONG_COLS)
 #define PONG_H ((double)PONG_ROWS)
 
-#define PONG_MAX_SCORE 3
 
 #define PONG_BALL_SIZE      1.0
-#define PONG_BALL_HUE       85
 #define PONG_BALL_SPEED     0.06
 #define PONG_BALL_SPEED_MAX 0.20
 #define PONG_BALL_ACCELERATION 1.09
 
 #define PONG_PAD_SIZE 1.5
-#define PONG_PAD_HUE  201
 #define PONG_PAD_SPEED_PLAYER 0.03
 #define PONG_PAD_SPEED_CPU    0.02
 #define PONG_PAD_ALIGN_GRID   false
@@ -51,20 +59,30 @@
 #define PONG_SCORE_DURATION 2000
 #define PONG_GAME_OVER_DURATION 5000
 
-#define PONG_COLOR_COUNTDOWN C_YELLOW
-#define PONG_COLOR_SCORE     C_WHITE
-#define PONG_COLOR_WINNER    C_GREEN
-#define PONG_COLOR_LOSER     C_WHITE
 
+//----[ Game audio ]----------------------------------------------------------//
+
+/*
+	Some useful references for QMK audio:
+
+	- https://docs.qmk.fm/#/feature_audio
+	- https://github.com/qmk/qmk_firmware/blob/master/quantum/audio/song_list.h
+*/
+
+// this is outside the state so it can persist between games
 static bool pong_sound_muted = false;
+
+#define PONG_PLAY(name) (!pong_sound_muted ? PLAY_SONG(pong_sound_ ## name) : (void)0)
 
 float pong_sound_hit_bat[][2]  = SONG(Q__NOTE(_C6));
 float pong_sound_hit_wall[][2] = SONG(Q__NOTE(_A2));
 float pong_sound_point[][2]    = SONG(H__NOTE(_A4), H__NOTE(_B4));
 float pong_sound_win[][2]      = SONG(
-	E__NOTE(_A5), E__NOTE(_B5), E__NOTE(_CS6), E__NOTE(_D6), E__NOTE(_E6), E__NOTE(_FS6), E__NOTE(_GS6), E__NOTE(_A6));
+	E__NOTE(_A5), E__NOTE(_B5), E__NOTE(_CS6), E__NOTE(_D6),
+	E__NOTE(_E6), E__NOTE(_FS6), E__NOTE(_GS6), E__NOTE(_A6));
 
-#define PONG_PLAY(name) (!pong_sound_muted ? PLAY_SONG(pong_sound_ ## name) : (void)0)
+
+//----[ Game state ]----------------------------------------------------------//
 
 typedef enum {
 	PONG_START,
@@ -77,12 +95,13 @@ typedef enum {
 } pong_state_t;
 
 typedef struct {
+	bool is_cpu;
 	bool up;
 	bool down;
 	bool serve;
 } pong_controls_t;
 
-static struct {
+static struct pong_state_t {
 	vec_t ball_pos;
 	vec_t ball_speed;
 	vec_t p1_pos;
@@ -96,12 +115,12 @@ static struct {
 
 	pong_state_t state;
 
-	bool is_cpu_p1;
-	bool is_cpu_p2;
-
 	pong_controls_t controls_p1;
 	pong_controls_t controls_p2;
 } pong = { 0 };
+
+
+//----[ Helper functions ]----------------------------------------------------//
 
 void pong_move_pad(vec_t *player, double direction, double speed);
 void pong_cpu_tick(vec_t *player);
@@ -110,11 +129,11 @@ bool pong_reflect_value(double *v, double min, double max);
 void pong_draw_board(void);
 void pong_draw_digit(HSV color, int digit, bool p1, bool p2);
 
+
+//----[ Pong overlay ]--------------------------------------------------------//
+
 bool pong_overlay_process(uint16_t keycode, keyrecord_t *record)
 {
-	uint8_t col = record->event.key.col;
-	uint8_t row = record->event.key.row;
-
 	if (keycode == KC_M) {
 		if (record->event.pressed) {
 			pong_sound_muted = !pong_sound_muted;
@@ -122,47 +141,51 @@ bool pong_overlay_process(uint16_t keycode, keyrecord_t *record)
 		return false;
 	}
 
-	bool *player_is_cpu_flag = 0;
-	pong_controls_t *controls = 0;
+	uint8_t col = record->event.key.col;
+	uint8_t row = record->event.key.row;
+
+	pong_controls_t *current_controls = 0;
+
 	if (row == PONG_CONTROL_P1_ROW) {
-		player_is_cpu_flag = &pong.is_cpu_p1;
-		controls = &pong.controls_p1;
+		current_controls = &pong.controls_p1;
 	} else if (row == PONG_CONTROL_P2_ROW) {
-		player_is_cpu_flag = &pong.is_cpu_p2;
-		controls = &pong.controls_p2;
+		current_controls = &pong.controls_p2;
+	} else {
+		// for any other key we just close the overlay
+		close_overlay();
+		return false;
 	}
 
-	if (player_is_cpu_flag) {
-		bool is_cpu = *player_is_cpu_flag;
-		bool pressed = record->event.pressed;
-		switch (col) {
-			case PONG_CONTROL_P1_UP:
-			case PONG_CONTROL_P2_UP:
-				is_cpu = false;
-				controls->up = pressed;
-				break;
-			case PONG_CONTROL_P1_DOWN:
-			case PONG_CONTROL_P2_DOWN:
-				is_cpu = false;
-				controls->down = pressed;
-				break;
-			case PONG_CONTROL_P1_SERVE:
-			case PONG_CONTROL_P2_SERVE:
-				is_cpu = false;
-				controls->serve = pressed;
-				break;
-			case PONG_CONTROL_QUIT:
-				is_cpu = true;
-				break;
-		}
-		*player_is_cpu_flag = is_cpu;
-	} else {
-		close_overlay();
+	bool pressed = record->event.pressed;
+	switch (col) {
+		case PONG_CONTROL_P1_UP:
+		case PONG_CONTROL_P2_UP:
+			current_controls->is_cpu = false;
+			current_controls->up = pressed;
+			break;
+		case PONG_CONTROL_P1_DOWN:
+		case PONG_CONTROL_P2_DOWN:
+			current_controls->is_cpu = false;
+			current_controls->down = pressed;
+			break;
+		case PONG_CONTROL_P1_SERVE:
+		case PONG_CONTROL_P2_SERVE:
+			current_controls->is_cpu = false;
+			current_controls->serve = pressed;
+			break;
+		case PONG_CONTROL_QUIT:
+			current_controls->is_cpu = true;
+			break;
 	}
 
 	return false;
 }
 
+// This is called by the main keyboard loop to set the RGB state for the
+// led matrix.
+//
+// Since this is called in a tight loop, we use it as the main game loop,
+// updating the physics and then rendering the game state using the matrix.
 void pong_overlay_rgb(void)
 {
 	clear_led_matrix();
@@ -191,16 +214,16 @@ void pong_overlay_rgb(void)
 		flash_controls_fade = fmin(ceil(flash * 0xFF), 0xFF);
 	}
 
-	if (pong.input_timer == 0 || now - pong.input_timer > PONG_TICK * 5) {
+	if (pong.input_timer == 0 || now - pong.input_timer > PONG_TICK_MS * 5) {
 		pong.input_timer = now;
 	}
 
-	while (now - pong.input_timer > PONG_TICK) {
-		pong.input_timer += PONG_TICK;
+	while (now - pong.input_timer > PONG_TICK_MS) {
+		pong.input_timer += PONG_TICK_MS;
 		if (pong.state != PONG_PLAYING && pong.state != PONG_SERVE_P1 && pong.state != PONG_SERVE_P2) {
 			continue;
 		}
-		if (!pong.is_cpu_p1) {
+		if (!pong.controls_p1.is_cpu) {
 			if (pong.controls_p1.up) {
 				pong_move_pad(&pong.p1_pos, -1, PONG_PAD_SPEED_PLAYER);
 			}
@@ -208,7 +231,7 @@ void pong_overlay_rgb(void)
 				pong_move_pad(&pong.p1_pos, +1, PONG_PAD_SPEED_PLAYER);
 			}
 		}
-		if (!pong.is_cpu_p2) {
+		if (!pong.controls_p2.is_cpu) {
 			if (pong.controls_p2.up) {
 				pong_move_pad(&pong.p2_pos, -1, PONG_PAD_SPEED_PLAYER);
 			}
@@ -242,7 +265,7 @@ void pong_overlay_rgb(void)
 
 		bool is_p1 = pong.state == PONG_SERVE_P1;
 		bool is_p2 = !is_p1;
-		bool is_cpu = (is_p1 && pong.is_cpu_p1) || (is_p2 && pong.is_cpu_p2);
+		bool is_cpu = (is_p1 && pong.controls_p1.is_cpu) || (is_p2 && pong.controls_p2.is_cpu);
 
 		pong.ball_pos.y = 0;
 		pong.ball_pos.x = ((PONG_W / 2) - 1.5) * (is_p1 ? -1 : +1);
@@ -283,9 +306,9 @@ void pong_overlay_rgb(void)
 
 	case PONG_PLAYING: {
 		uint32_t delta = now - pong.start;
-		while (delta >= PONG_TICK) {
-			delta -= PONG_TICK;
-			pong.start += PONG_TICK;
+		while (delta >= PONG_TICK_MS) {
+			delta -= PONG_TICK_MS;
+			pong.start += PONG_TICK_MS;
 			pong.ball_pos = vec_add(pong.ball_pos, pong.ball_speed);
 			if (pong_reflect_value(&pong.ball_pos.x, PONG_MIN_X, PONG_MAX_X)) {
 				pong.start = now;
@@ -309,10 +332,10 @@ void pong_overlay_rgb(void)
 				PONG_PLAY(hit_wall);
 			}
 
-			if (pong.is_cpu_p1) {
+			if (pong.controls_p1.is_cpu) {
 				pong_cpu_tick(&pong.p1_pos);
 			}
-			if (pong.is_cpu_p2) {
+			if (pong.controls_p2.is_cpu) {
 				pong_cpu_tick(&pong.p2_pos);
 			}
 
@@ -365,10 +388,10 @@ void pong_overlay_rgb(void)
 
 	}
 
-	if (!pong.is_cpu_p1 || enable_input_flash) {
-		HSV c_keys = PONG_CONTROL_COLOR;
+	if (!pong.controls_p1.is_cpu || enable_input_flash) {
+		HSV c_keys = PONG_COLOR_CONTROL;
 		HSV c_quit = C_RED;
-		if (pong.is_cpu_p1) {
+		if (pong.controls_p1.is_cpu) {
 			c_keys.v = flash_controls_fade;
 			c_quit.v = 0;
 		}
@@ -383,10 +406,10 @@ void pong_overlay_rgb(void)
 		led_set_by_row_col_hsv(row, PONG_CONTROL_QUIT, c_quit);
 	}
 
-	if (!pong.is_cpu_p2 || enable_input_flash) {
-		HSV c_keys = PONG_CONTROL_COLOR;
+	if (!pong.controls_p2.is_cpu || enable_input_flash) {
+		HSV c_keys = PONG_COLOR_CONTROL;
 		HSV c_quit = C_RED;
-		if (pong.is_cpu_p2) {
+		if (pong.controls_p2.is_cpu) {
 			c_keys.v = flash_controls_fade;
 			c_quit.v = 0;
 		}
@@ -412,9 +435,11 @@ void open_pong(void)
 	zero(&pong);
 	pong.start = timer_read32();
 	pong.state = PONG_START;
-	pong.is_cpu_p1 = true;
-	pong.is_cpu_p2 = true;
+	pong.controls_p1.is_cpu = true;
+	pong.controls_p2.is_cpu = true;
 	open_overlay(pong_overlay);
+
+	// seed the random generator when we open the overlay
 	srand(pong.start);
 }
 
