@@ -181,6 +181,8 @@ bool pong_overlay_process(uint16_t keycode, keyrecord_t *record)
 	return false;
 }
 
+uint8_t pong_calc_input_led_flashing(uint32_t now);
+
 // This is called by the main keyboard loop to set the RGB state for the
 // led matrix.
 //
@@ -191,28 +193,6 @@ void pong_overlay_rgb(void)
 	clear_led_matrix();
 
 	uint32_t now = timer_read32();
-
-	bool enable_input_flash = false;
-	uint8_t flash_controls_fade = 0;
-
-	uint32_t delay = now - pong.start;
-	const double ramp_up = 0.25;
-	const double time_on = 0.50;
-	const double time_dn = 0.10;
-	const uint32_t phase_time = 500;
-	double phase = (double)(delay % phase_time) / phase_time;
-	double flash = 0;
-	if (phase <= ramp_up) {
-		flash = phase / ramp_up;
-	} else if (phase <= ramp_up + time_on) {
-		flash = 1;
-	} else if (phase <= ramp_up + time_on + time_dn) {
-		double pos = phase - ramp_up - time_on;
-		flash = (time_dn - pos) / time_dn;
-	}
-	if (flash > EPSILON) {
-		flash_controls_fade = fmin(ceil(flash * 0xFF), 0xFF);
-	}
 
 	if (pong.input_timer == 0 || now - pong.input_timer > PONG_TICK_MS * 5) {
 		pong.input_timer = now;
@@ -254,7 +234,6 @@ void pong_overlay_rgb(void)
 			if (show_digit) {
 				pong_draw_digit(PONG_COLOR_COUNTDOWN, (countdown / 1000) + 1, true, true);
 			}
-			enable_input_flash = true;
 		}
 		break;
 	}
@@ -388,16 +367,19 @@ void pong_overlay_rgb(void)
 
 	}
 
-	if (!pong.controls_p1.is_cpu || enable_input_flash) {
+	bool flashing_input_controls = pong.state == PONG_START;
+	uint8_t input_controls_flash_intensity = pong_calc_input_led_flashing(now);
+
+	if (!pong.controls_p1.is_cpu || flashing_input_controls) {
 		HSV c_keys = PONG_COLOR_CONTROL;
 		HSV c_quit = C_RED;
 		if (pong.controls_p1.is_cpu) {
-			c_keys.v = flash_controls_fade;
+			c_keys.v = input_controls_flash_intensity;
 			c_quit.v = 0;
 		}
 		HSV c_serve = c_keys;
 		if (pong.state == PONG_SERVE_P1) {
-			c_serve.v = flash_controls_fade;
+			c_serve.v = input_controls_flash_intensity;
 		}
 		uint8_t row = PONG_CONTROL_P1_ROW;
 		led_set_by_row_col_hsv(row, PONG_CONTROL_P1_UP, c_keys);
@@ -406,16 +388,16 @@ void pong_overlay_rgb(void)
 		led_set_by_row_col_hsv(row, PONG_CONTROL_QUIT, c_quit);
 	}
 
-	if (!pong.controls_p2.is_cpu || enable_input_flash) {
+	if (!pong.controls_p2.is_cpu || flashing_input_controls) {
 		HSV c_keys = PONG_COLOR_CONTROL;
 		HSV c_quit = C_RED;
 		if (pong.controls_p2.is_cpu) {
-			c_keys.v = flash_controls_fade;
+			c_keys.v = input_controls_flash_intensity;
 			c_quit.v = 0;
 		}
 		HSV c_serve = c_keys;
 		if (pong.state == PONG_SERVE_P2) {
-			c_serve.v = flash_controls_fade;
+			c_serve.v = input_controls_flash_intensity;
 		}
 		uint8_t row = PONG_CONTROL_P2_ROW;
 		led_set_by_row_col_hsv(row, PONG_CONTROL_P2_UP, c_keys);
@@ -441,6 +423,31 @@ void open_pong(void)
 
 	// seed the random generator when we open the overlay
 	srand(pong.start);
+}
+
+uint8_t pong_calc_input_led_flashing(uint32_t now)
+{
+	const uint32_t cycle_duration_ms = 500;
+
+	// those are normalized so that 1 equals the flash cycle
+	const double fade_in = 0.25;
+	const double full_on = 0.50;
+	const double fade_out = 0.10;
+
+	uint32_t delay = now - pong.start;
+	double phase = (double)(delay % cycle_duration_ms) / cycle_duration_ms;
+
+	double intensity = 0;
+	if (phase <= fade_in) {
+		intensity = phase / fade_in;
+	} else if (phase <= fade_in + full_on) {
+		intensity = 1;
+	} else if (phase <= fade_in + full_on + fade_out) {
+		double fade_out_start = fade_in + full_on;
+		double fade_out_phase = phase - fade_out_start;
+		intensity = (fade_out - fade_out_phase) / fade_out;
+	}
+	return intensity > EPSILON ? fmin(ceil(intensity * 0xFF), 0xFF) : 0;
 }
 
 //----------------------------------------------------------------------------//
