@@ -1,6 +1,8 @@
 #pragma once
 
 #define PONG_MAX_SCORE 3
+
+// Fixed time step for game physics and other time-related logic.
 #define PONG_TICK_MS   10
 
 // Keyboard rows for the player input keys
@@ -104,11 +106,27 @@ typedef struct {
 static struct pong_state_t {
 	vec_t ball_pos;
 	vec_t ball_speed;
+
+	// Position for the player pads. The `x` is fixed to the pad position on
+	// the game board.
 	vec_t p1_pos;
 	vec_t p2_pos;
 
-	uint32_t start;
-	uint32_t input_timer;
+	/*
+		Game timing
+		===========
+
+		`game_timer` is used as base for the fixed time step loop that controls
+		the game physics and input processing.
+
+		Each step is `PONG_TICK_MS` long and will increment the game timer
+		accordingly.
+
+		`base_timer` is used as an auxiliary timing device to control state
+		timing, transitions, and animations unrelated to the game physics.
+	*/
+	uint32_t game_timer;
+	uint32_t base_timer;
 
 	uint8_t score_p1;
 	uint8_t score_p2;
@@ -119,18 +137,16 @@ static struct pong_state_t {
 	pong_controls_t controls_p2;
 } pong = { 0 };
 
-
-//----[ Helper functions ]----------------------------------------------------//
-
-void pong_move_pad(vec_t *player, double direction, double speed);
-void pong_cpu_tick(vec_t *player);
-void pong_collide_pad(vec_t *player);
-bool pong_reflect_value(double *v, double min, double max);
-void pong_draw_board(void);
-void pong_draw_digit(HSV color, int digit, bool p1, bool p2);
-
+void pong_set_state(pong_state_t new_state)
+{
+	pong.state = new_state;
+	pong.base_timer = pong.game_timer;
+}
 
 //----[ Pong overlay ]--------------------------------------------------------//
+
+void pong_draw_board(void);
+void pong_draw_digit(HSV color, int digit, bool p1, bool p2);
 
 bool pong_overlay_process(uint16_t keycode, keyrecord_t *record)
 {
@@ -181,7 +197,8 @@ bool pong_overlay_process(uint16_t keycode, keyrecord_t *record)
 	return false;
 }
 
-uint8_t pong_calc_input_led_flashing(uint32_t now);
+void pong_process_game_ticks(void);
+uint8_t pong_calc_input_led_flashing(void);
 
 // This is called by the main keyboard loop to set the RGB state for the
 // led matrix.
@@ -192,42 +209,16 @@ void pong_overlay_rgb(void)
 {
 	clear_led_matrix();
 
-	uint32_t now = timer_read32();
-
-	if (pong.input_timer == 0 || now - pong.input_timer > PONG_TICK_MS * 5) {
-		pong.input_timer = now;
-	}
-
-	while (now - pong.input_timer > PONG_TICK_MS) {
-		pong.input_timer += PONG_TICK_MS;
-		if (pong.state != PONG_PLAYING && pong.state != PONG_SERVE_P1 && pong.state != PONG_SERVE_P2) {
-			continue;
-		}
-		if (!pong.controls_p1.is_cpu) {
-			if (pong.controls_p1.up) {
-				pong_move_pad(&pong.p1_pos, -1, PONG_PAD_SPEED_PLAYER);
-			}
-			if (pong.controls_p1.down) {
-				pong_move_pad(&pong.p1_pos, +1, PONG_PAD_SPEED_PLAYER);
-			}
-		}
-		if (!pong.controls_p2.is_cpu) {
-			if (pong.controls_p2.up) {
-				pong_move_pad(&pong.p2_pos, -1, PONG_PAD_SPEED_PLAYER);
-			}
-			if (pong.controls_p2.down) {
-				pong_move_pad(&pong.p2_pos, +1, PONG_PAD_SPEED_PLAYER);
-			}
-		}
-	}
+	// process player input, update game physics, and update `gamer_timer`
+	pong_process_game_ticks();
+	uint32_t now = pong.game_timer;
 
 	switch (pong.state) {
 
 	case PONG_START: {
-		uint32_t start_at = pong.start + PONG_COUNTDOWN;
+		uint32_t start_at = pong.base_timer + PONG_COUNTDOWN;
 		if (now >= start_at) {
-			pong.start = now;
-			pong.state = rand() % 2 ? PONG_SERVE_P1 : PONG_SERVE_P2;
+			pong_set_state(rand() % 2 ? PONG_SERVE_P1 : PONG_SERVE_P2);
 		} else {
 			uint32_t countdown = start_at - now;
 			bool show_digit = countdown >= 200 && (countdown % 1000) < PONG_COUNTDOWN_FLASH_ACTIVE;
@@ -240,7 +231,7 @@ void pong_overlay_rgb(void)
 
 	case PONG_SERVE_P1:
 	case PONG_SERVE_P2: {
-		uint32_t delay = now - pong.start;
+		uint32_t delay = now - pong.base_timer;
 
 		bool is_p1 = pong.state == PONG_SERVE_P1;
 		bool is_p2 = !is_p1;
@@ -262,8 +253,7 @@ void pong_overlay_rgb(void)
 		serve = serve || (!is_cpu && is_p2 && pong.controls_p2.serve);
 
 		if (serve) {
-			pong.start = now;
-			pong.state = PONG_PLAYING;
+			pong_set_state(PONG_PLAYING);
 			pong.ball_speed.x = is_p1 ? +1 : -1;
 
 			const double speed_vertical_bias = 1.25;
@@ -284,57 +274,18 @@ void pong_overlay_rgb(void)
 	}
 
 	case PONG_PLAYING: {
-		uint32_t delta = now - pong.start;
-		while (delta >= PONG_TICK_MS) {
-			delta -= PONG_TICK_MS;
-			pong.start += PONG_TICK_MS;
-			pong.ball_pos = vec_add(pong.ball_pos, pong.ball_speed);
-			if (pong_reflect_value(&pong.ball_pos.x, PONG_MIN_X, PONG_MAX_X)) {
-				pong.start = now;
-				if (pong.ball_pos.x < 0) {
-					pong.score_p2++;
-					pong.state = pong.score_p2 < PONG_MAX_SCORE ? PONG_SCORE_P2 : PONG_GAME_OVER;
-				} else {
-					pong.score_p1++;
-					pong.state = pong.score_p1 < PONG_MAX_SCORE ? PONG_SCORE_P1 : PONG_GAME_OVER;
-				}
-				if (pong.state == PONG_GAME_OVER) {
-					PONG_PLAY(win);
-				} else {
-					PONG_PLAY(point);
-				}
-				break;
-			}
-
-			if (pong_reflect_value(&pong.ball_pos.y, PONG_MIN_Y, PONG_MAX_Y)) {
-				pong.ball_speed.y *= -1;
-				PONG_PLAY(hit_wall);
-			}
-
-			if (pong.controls_p1.is_cpu) {
-				pong_cpu_tick(&pong.p1_pos);
-			}
-			if (pong.controls_p2.is_cpu) {
-				pong_cpu_tick(&pong.p2_pos);
-			}
-
-			pong_collide_pad(&pong.p1_pos);
-			pong_collide_pad(&pong.p2_pos);
-		}
-
 		pong_draw_board();
 		break;
 	}
 
 	case PONG_SCORE_P1:
 	case PONG_SCORE_P2: {
-		uint32_t delta = now - pong.start;
+		uint32_t delta = now - pong.base_timer;
 		bool is_p1 = pong.state == PONG_SCORE_P1;
 		bool is_p2 = !is_p1;
 
 		if (delta >= PONG_SCORE_DURATION) {
-			pong.start = now;
-			pong.state = is_p1 ? PONG_SERVE_P1 : PONG_SERVE_P2;
+			pong_set_state(is_p1 ? PONG_SERVE_P1 : PONG_SERVE_P2);
 		} else if (delta < 250) {
 			pong_draw_board();
 		} else if (delta > 500) {
@@ -349,10 +300,9 @@ void pong_overlay_rgb(void)
 	}
 
 	case PONG_GAME_OVER: {
-		uint32_t delta = now - pong.start;
+		uint32_t delta = now - pong.base_timer;
 		if (delta >= PONG_GAME_OVER_DURATION) {
-			pong.start = now;
-			pong.state = PONG_START;
+			pong_set_state(PONG_START);
 			pong.score_p1 = pong.score_p2 = 0;
 		} else if (delta > 250) {
 			bool p1_win = pong.score_p1 > pong.score_p2;
@@ -368,7 +318,7 @@ void pong_overlay_rgb(void)
 	}
 
 	bool flashing_input_controls = pong.state == PONG_START;
-	uint8_t input_controls_flash_intensity = pong_calc_input_led_flashing(now);
+	uint8_t input_controls_flash_intensity = pong_calc_input_led_flashing();
 
 	if (!pong.controls_p1.is_cpu || flashing_input_controls) {
 		HSV c_keys = PONG_COLOR_CONTROL;
@@ -415,63 +365,108 @@ static overlay_t pong_overlay = {
 void open_pong(void)
 {
 	zero(&pong);
-	pong.start = timer_read32();
+	pong.game_timer = timer_read32();
+	pong.base_timer = timer_read32();
 	pong.state = PONG_START;
 	pong.controls_p1.is_cpu = true;
 	pong.controls_p2.is_cpu = true;
 	open_overlay(pong_overlay);
 
 	// seed the random generator when we open the overlay
-	srand(pong.start);
+	srand(pong.game_timer);
 }
 
-uint8_t pong_calc_input_led_flashing(uint32_t now)
+//----[ Game loop functions ]-------------------------------------------------//
+
+void pong_process_player_input_and_update_pads(void);
+void pong_cpu_tick(vec_t *player);
+void pong_move_pad(vec_t *player, double direction, double speed);
+void pong_collide_pad(vec_t *player);
+
+// Helpers:
+bool pong_reflect_value(double *v, double min, double max);
+double pong_collision(vec_t pos_a, double size_a, vec_t pos_b, double size_b);
+double pong_collision_1d(double pos_a, double size_a, double pos_b, double size_b);
+bool pong_is_ball_moving_towards(vec_t *player);
+
+void pong_process_game_ticks()
 {
-	const uint32_t cycle_duration_ms = 500;
+	uint32_t now = timer_read32();
 
-	// those are normalized so that 1 equals the flash cycle
-	const double fade_in = 0.25;
-	const double full_on = 0.50;
-	const double fade_out = 0.10;
-
-	uint32_t delay = now - pong.start;
-	double phase = (double)(delay % cycle_duration_ms) / cycle_duration_ms;
-
-	double intensity = 0;
-	if (phase <= fade_in) {
-		intensity = phase / fade_in;
-	} else if (phase <= fade_in + full_on) {
-		intensity = 1;
-	} else if (phase <= fade_in + full_on + fade_out) {
-		double fade_out_start = fade_in + full_on;
-		double fade_out_phase = phase - fade_out_start;
-		intensity = (fade_out - fade_out_phase) / fade_out;
+	// this is a safeguard to avoid processing too many ticks if for whatever
+	// reason the game timer lagged behind the real time
+	const uint32_t MAX_TICK_SPAN = 1000;
+	if (now - pong.game_timer > MAX_TICK_SPAN) {
+		// run at least one tick to update the physics
+		pong.game_timer = now - MAX_TICK_SPAN;
 	}
-	return intensity > EPSILON ? fmin(ceil(intensity * 0xFF), 0xFF) : 0;
-}
 
-//----------------------------------------------------------------------------//
-// Helpers
-//----------------------------------------------------------------------------//
+	while (now - pong.game_timer >= PONG_TICK_MS) {
+		pong.game_timer += PONG_TICK_MS;
 
-void pong_move_pad(vec_t *player, double direction, double speed)
-{
-	const double max = (PONG_H - PONG_PAD_SIZE) / 2;
-	const double min = -max;
-	double pos = player->y;
-	if (direction < 0) {
-		pos = fmax(min, pos - speed);
-	} else if (direction > 0) {
-		pos = fmin(max, pos + speed);
+		// we allow the player to move the pads outside of the playing state,
+		// but the actual game logic only runs when playing
+		pong_process_player_input_and_update_pads();
+		if (pong.state != PONG_PLAYING) {
+			continue;
+		}
+
+		if (pong.controls_p1.is_cpu) {
+			pong_cpu_tick(&pong.p1_pos);
+		}
+		if (pong.controls_p2.is_cpu) {
+			pong_cpu_tick(&pong.p2_pos);
+		}
+
+		pong.ball_pos = vec_add(pong.ball_pos, pong.ball_speed);
+		if (pong_reflect_value(&pong.ball_pos.x, PONG_MIN_X, PONG_MAX_X)) {
+			pong.game_timer = now;
+			if (pong.ball_pos.x < 0) {
+				pong.score_p2++;
+				pong_set_state(pong.score_p2 < PONG_MAX_SCORE ? PONG_SCORE_P2 : PONG_GAME_OVER);
+			} else {
+				pong.score_p1++;
+				pong_set_state(pong.score_p1 < PONG_MAX_SCORE ? PONG_SCORE_P1 : PONG_GAME_OVER);
+			}
+			if (pong.state == PONG_GAME_OVER) {
+				PONG_PLAY(win);
+			} else {
+				PONG_PLAY(point);
+			}
+			break;
+		}
+
+		if (pong_reflect_value(&pong.ball_pos.y, PONG_MIN_Y, PONG_MAX_Y)) {
+			pong.ball_speed.y *= -1;
+			PONG_PLAY(hit_wall);
+		}
+
+		pong_collide_pad(&pong.p1_pos);
+		pong_collide_pad(&pong.p2_pos);
 	}
-	player->y = pos;
 }
 
-bool pong_is_ball_moving_towards(vec_t *player)
+void pong_process_player_input_and_update_pads(void)
 {
-	double ball_distance = player->x - pong.ball_pos.x;
-	bool ball_is_coming = signbit(pong.ball_speed.x) == signbit(ball_distance);
-	return ball_is_coming;
+	if (pong.state != PONG_PLAYING && pong.state != PONG_SERVE_P1 && pong.state != PONG_SERVE_P2) {
+		return;
+	}
+	if (!pong.controls_p1.is_cpu) {
+		if (pong.controls_p1.up) {
+			pong_move_pad(&pong.p1_pos, -1, PONG_PAD_SPEED_PLAYER);
+		}
+		if (pong.controls_p1.down) {
+			pong_move_pad(&pong.p1_pos, +1, PONG_PAD_SPEED_PLAYER);
+		}
+	}
+	if (!pong.controls_p2.is_cpu) {
+		if (pong.controls_p2.up) {
+			pong_move_pad(&pong.p2_pos, -1, PONG_PAD_SPEED_PLAYER);
+		}
+		if (pong.controls_p2.down) {
+			pong_move_pad(&pong.p2_pos, +1, PONG_PAD_SPEED_PLAYER);
+		}
+	}
 }
 
 void pong_cpu_tick(vec_t *player)
@@ -503,41 +498,17 @@ void pong_cpu_tick(vec_t *player)
 	}
 }
 
-bool pong_reflect_value(double *v, double min, double max)
+void pong_move_pad(vec_t *player, double direction, double speed)
 {
-	if (*v < (min - EPSILON)) {
-		*v = min + (min - *v);
-		return true;
+	const double max = (PONG_H - PONG_PAD_SIZE) / 2;
+	const double min = -max;
+	double pos = player->y;
+	if (direction < 0) {
+		pos = fmax(min, pos - speed);
+	} else if (direction > 0) {
+		pos = fmin(max, pos + speed);
 	}
-	if (*v > (max + EPSILON)) {
-		*v = max - (*v - max);
-		return true;
-	}
-
-	return false;
-}
-
-double pong_collision_1d(double pos_a, double size_a, double pos_b, double size_b)
-{
-	double a1 = pos_a - size_a / 2;
-	double a2 = pos_a + size_a / 2;
-	double b1 = pos_b - size_b / 2;
-	double b2 = pos_b + size_b / 2;
-	if (b1 >= a2 || b2 <= a1) {
-		return 0;
-	}
-	double p1 = fmax(a1, b1);
-	double p2 = fmin(a2, b2);
-	double overlap = p2 - p1;
-	return overlap < EPSILON ? 0 : overlap;
-}
-
-double pong_collision(vec_t pos_a, double size_a, vec_t pos_b, double size_b)
-{
-	double dx = pong_collision_1d(pos_a.x, size_a, pos_b.x, size_b);
-	double dy = pong_collision_1d(pos_a.y, size_a, pos_b.y, size_b);
-	double res = dx * dy;
-	return res < EPSILON ? 0 : res;
+	player->y = pos;
 }
 
 void pong_collide_pad(vec_t *player)
@@ -594,6 +565,79 @@ void pong_collide_pad(vec_t *player)
 	}
 
 	pong.ball_speed = reflected_speed;
+}
+
+//----[ Helper functions ]----------------------------------------------------//
+
+bool pong_reflect_value(double *v, double min, double max)
+{
+	if (*v < (min - EPSILON)) {
+		*v = min + (min - *v);
+		return true;
+	}
+	if (*v > (max + EPSILON)) {
+		*v = max - (*v - max);
+		return true;
+	}
+
+	return false;
+}
+
+double pong_collision(vec_t pos_a, double size_a, vec_t pos_b, double size_b)
+{
+	double dx = pong_collision_1d(pos_a.x, size_a, pos_b.x, size_b);
+	double dy = pong_collision_1d(pos_a.y, size_a, pos_b.y, size_b);
+	double res = dx * dy;
+	return res < EPSILON ? 0 : res;
+}
+
+double pong_collision_1d(double pos_a, double size_a, double pos_b, double size_b)
+{
+	double a1 = pos_a - size_a / 2;
+	double a2 = pos_a + size_a / 2;
+	double b1 = pos_b - size_b / 2;
+	double b2 = pos_b + size_b / 2;
+	if (b1 >= a2 || b2 <= a1) {
+		return 0;
+	}
+	double p1 = fmax(a1, b1);
+	double p2 = fmin(a2, b2);
+	double overlap = p2 - p1;
+	return overlap < EPSILON ? 0 : overlap;
+}
+
+bool pong_is_ball_moving_towards(vec_t *player)
+{
+	double ball_distance = player->x - pong.ball_pos.x;
+	bool ball_is_coming = signbit(pong.ball_speed.x) == signbit(ball_distance);
+	return ball_is_coming;
+}
+
+//----[ Drawing functions ]---------------------------------------------------//
+
+uint8_t pong_calc_input_led_flashing()
+{
+	const uint32_t cycle_duration_ms = 500;
+
+	// those are normalized so that 1 equals the flash cycle
+	const double fade_in = 0.25;
+	const double full_on = 0.50;
+	const double fade_out = 0.10;
+
+	uint32_t delay = pong.game_timer - pong.base_timer;
+	double phase = (double)(delay % cycle_duration_ms) / cycle_duration_ms;
+
+	double intensity = 0;
+	if (phase <= fade_in) {
+		intensity = phase / fade_in;
+	} else if (phase <= fade_in + full_on) {
+		intensity = 1;
+	} else if (phase <= fade_in + full_on + fade_out) {
+		double fade_out_start = fade_in + full_on;
+		double fade_out_phase = phase - fade_out_start;
+		intensity = (fade_out - fade_out_phase) / fade_out;
+	}
+	return intensity > EPSILON ? fmin(ceil(intensity * 0xFF), 0xFF) : 0;
 }
 
 uint8_t pong_area_to_hsv_value(double area)
