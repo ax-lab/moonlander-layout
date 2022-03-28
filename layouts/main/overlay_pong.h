@@ -34,7 +34,6 @@
 #define PONG_W ((double)PONG_COLS)
 #define PONG_H ((double)PONG_ROWS)
 
-
 #define PONG_BALL_SIZE      1.0
 #define PONG_BALL_SPEED     0.06
 #define PONG_BALL_SPEED_MAX 0.20
@@ -215,105 +214,105 @@ void pong_overlay_rgb(void)
 
 	switch (pong.state) {
 
-	case PONG_START: {
-		uint32_t start_at = pong.base_timer + PONG_COUNTDOWN;
-		if (now >= start_at) {
-			pong_set_state(rand() % 2 ? PONG_SERVE_P1 : PONG_SERVE_P2);
-		} else {
-			uint32_t countdown = start_at - now;
-			bool show_digit = countdown >= 200 && (countdown % 1000) < PONG_COUNTDOWN_FLASH_ACTIVE;
-			if (show_digit) {
-				pong_draw_digit(PONG_COLOR_COUNTDOWN, (countdown / 1000) + 1, true, true);
-			}
-		}
-		break;
-	}
-
-	case PONG_SERVE_P1:
-	case PONG_SERVE_P2: {
-		uint32_t delay = now - pong.base_timer;
-
-		bool is_p1 = pong.state == PONG_SERVE_P1;
-		bool is_p2 = !is_p1;
-		bool is_cpu = (is_p1 && pong.controls_p1.is_cpu) || (is_p2 && pong.controls_p2.is_cpu);
-
-		pong.ball_pos.y = 0;
-		pong.ball_pos.x = ((PONG_W / 2) - 1.5) * (is_p1 ? -1 : +1);
-		pong.ball_speed = vec_zero();
-
-		if (delay < 100) {
-			pong.p1_pos.x = -(PONG_W / 2 - 0.5);
-			pong.p1_pos.y = 0;
-			pong.p2_pos.x = +(PONG_W / 2 - 0.5);
-			pong.p2_pos.y = 0;
-		}
-
-		bool serve = is_cpu && delay >= PONG_SERVE_DELAY;
-		serve = serve || (!is_cpu && is_p1 && pong.controls_p1.serve);
-		serve = serve || (!is_cpu && is_p2 && pong.controls_p2.serve);
-
-		if (serve) {
-			pong_set_state(PONG_PLAYING);
-			pong.ball_speed.x = is_p1 ? +1 : -1;
-
-			const double speed_vertical_bias = 1.25;
-			double vertical;
-			if (is_cpu) {
-				vertical = random_double() - 0.5;
+		case PONG_START: {
+			uint32_t start_at = pong.base_timer + PONG_COUNTDOWN;
+			if (now >= start_at) {
+				pong_set_state(rand() % 2 ? PONG_SERVE_P1 : PONG_SERVE_P2);
 			} else {
-				double pos_y = is_p1 ? pong.p1_pos.y : pong.p2_pos.y;
-				vertical = -pos_y / PONG_H;
+				uint32_t countdown = start_at - now;
+				bool show_digit = countdown >= 200 && (countdown % 1000) < PONG_COUNTDOWN_FLASH_ACTIVE;
+				if (show_digit) {
+					pong_draw_digit(PONG_COLOR_COUNTDOWN, (countdown / 1000) + 1, true, true);
+				}
+			}
+			break;
+		}
+
+		case PONG_SERVE_P1:
+		case PONG_SERVE_P2: {
+			uint32_t delay = now - pong.base_timer;
+
+			bool is_p1 = pong.state == PONG_SERVE_P1;
+			bool is_p2 = !is_p1;
+			bool is_cpu = (is_p1 && pong.controls_p1.is_cpu) || (is_p2 && pong.controls_p2.is_cpu);
+
+			pong.ball_pos.y = 0;
+			pong.ball_pos.x = ((PONG_W / 2) - 1.5) * (is_p1 ? -1 : +1);
+			pong.ball_speed = vec_zero();
+
+			if (delay < 100) {
+				pong.p1_pos.x = -(PONG_W / 2 - 0.5);
+				pong.p1_pos.y = 0;
+				pong.p2_pos.x = +(PONG_W / 2 - 0.5);
+				pong.p2_pos.y = 0;
 			}
 
-			pong.ball_speed.y = 2 * speed_vertical_bias * vertical;
-			pong.ball_speed = vec_scale(vec_norm(pong.ball_speed), PONG_BALL_SPEED);
-		}
+			bool serve = is_cpu && delay >= PONG_SERVE_DELAY;
+			serve = serve || (!is_cpu && is_p1 && pong.controls_p1.serve);
+			serve = serve || (!is_cpu && is_p2 && pong.controls_p2.serve);
 
-		pong_draw_board();
-		break;
-	}
+			if (serve) {
+				pong_set_state(PONG_PLAYING);
+				pong.ball_speed.x = is_p1 ? +1 : -1;
 
-	case PONG_PLAYING: {
-		pong_draw_board();
-		break;
-	}
+				const double speed_vertical_bias = 1.25;
+				double vertical;
+				if (is_cpu) {
+					vertical = random_double() - 0.5;
+				} else {
+					double pos_y = is_p1 ? pong.p1_pos.y : pong.p2_pos.y;
+					vertical = -pos_y / PONG_H;
+				}
 
-	case PONG_SCORE_P1:
-	case PONG_SCORE_P2: {
-		uint32_t delta = now - pong.base_timer;
-		bool is_p1 = pong.state == PONG_SCORE_P1;
-		bool is_p2 = !is_p1;
+				pong.ball_speed.y = 2 * speed_vertical_bias * vertical;
+				pong.ball_speed = vec_scale(vec_norm(pong.ball_speed), PONG_BALL_SPEED);
+			}
 
-		if (delta >= PONG_SCORE_DURATION) {
-			pong_set_state(is_p1 ? PONG_SERVE_P1 : PONG_SERVE_P2);
-		} else if (delta < 250) {
 			pong_draw_board();
-		} else if (delta > 500) {
-			bool flash = (delta / 250) % 2 == 0 || delta > (PONG_SCORE_DURATION - 500);
-			bool score_p1 = (is_p1 && flash) || is_p2;
-			bool score_p2 = (is_p2 && flash) || is_p1;
-			pong_draw_digit(PONG_COLOR_SCORE, pong.score_p1, score_p1, false);
-			pong_draw_digit(PONG_COLOR_SCORE, pong.score_p2, false, score_p2);
+			break;
 		}
 
-		break;
-	}
-
-	case PONG_GAME_OVER: {
-		uint32_t delta = now - pong.base_timer;
-		if (delta >= PONG_GAME_OVER_DURATION) {
-			pong_set_state(PONG_START);
-			pong.score_p1 = pong.score_p2 = 0;
-		} else if (delta > 250) {
-			bool p1_win = pong.score_p1 > pong.score_p2;
-			bool flash = (delta / 250) % 2 == 1 || delta > 1500;
-			HSV p1 = p1_win ? PONG_COLOR_WINNER : PONG_COLOR_LOSER;
-			HSV p2 = p1_win ? PONG_COLOR_LOSER : PONG_COLOR_WINNER;
-			pong_draw_digit(p1, pong.score_p1, flash, false);
-			pong_draw_digit(p2, pong.score_p2, false, flash);
+		case PONG_PLAYING: {
+			pong_draw_board();
+			break;
 		}
-		break;
-	}
+
+		case PONG_SCORE_P1:
+		case PONG_SCORE_P2: {
+			uint32_t delta = now - pong.base_timer;
+			bool is_p1 = pong.state == PONG_SCORE_P1;
+			bool is_p2 = !is_p1;
+
+			if (delta >= PONG_SCORE_DURATION) {
+				pong_set_state(is_p1 ? PONG_SERVE_P1 : PONG_SERVE_P2);
+			} else if (delta < 250) {
+				pong_draw_board();
+			} else if (delta > 500) {
+				bool flash = (delta / 250) % 2 == 0 || delta > (PONG_SCORE_DURATION - 500);
+				bool score_p1 = (is_p1 && flash) || is_p2;
+				bool score_p2 = (is_p2 && flash) || is_p1;
+				pong_draw_digit(PONG_COLOR_SCORE, pong.score_p1, score_p1, false);
+				pong_draw_digit(PONG_COLOR_SCORE, pong.score_p2, false, score_p2);
+			}
+
+			break;
+		}
+
+		case PONG_GAME_OVER: {
+			uint32_t delta = now - pong.base_timer;
+			if (delta >= PONG_GAME_OVER_DURATION) {
+				pong_set_state(PONG_START);
+				pong.score_p1 = pong.score_p2 = 0;
+			} else if (delta > 250) {
+				bool p1_win = pong.score_p1 > pong.score_p2;
+				bool flash = (delta / 250) % 2 == 1 || delta > 1500;
+				HSV p1 = p1_win ? PONG_COLOR_WINNER : PONG_COLOR_LOSER;
+				HSV p2 = p1_win ? PONG_COLOR_LOSER : PONG_COLOR_WINNER;
+				pong_draw_digit(p1, pong.score_p1, flash, false);
+				pong_draw_digit(p2, pong.score_p2, false, flash);
+			}
+			break;
+		}
 
 	}
 
