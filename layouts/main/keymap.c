@@ -46,6 +46,8 @@ enum custom_keycodes
 	RGB_SLD = ML_SAFE_RANGE,
 };
 
+#define TDN(N)   TD(DANCE_ ## N)
+
 enum tap_dance_codes
 {
 	DANCE_0,
@@ -66,7 +68,23 @@ enum tap_dance_codes
 	DANCE_15,
 };
 
-#define TDN(N)   TD(DANCE_ ## N)
+#define D_ESC1 TDN(0)
+#define D_CALT TDN(1) // ctrl or alt
+#define D_COLT TDN(2) // colemak tab or close
+#define D_PRN1 TDN(3)
+#define D_PRN2 TDN(4)
+#define D_DEL1 TDN(5)
+#define D_DEL2 TDN(6)
+#define D_PRN3 TDN(7)
+#define D_XTAB TDN(8)
+#define D_ESC2 TDN(9)
+#define D_AF4  TDN(10)
+#define D_ATAB TDN(11)
+#define D_DEL3 TDN(12)
+#define D_CALC TDN(13)
+#define D_LFT  TDN(14)
+#define D_RGT  TDN(15)
+
 #define SFT_TAB  LSFT(KC_TAB)
 #define ALT_TAB  LALT(KC_TAB)
 #define WIN_TAB  LGUI(KC_TAB)
@@ -161,10 +179,10 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
 	// Base:
 	[LAYER_BASE] = LAYOUT_moonlander(
-		TDN(0)  , KC_1    , KC_2    , KC_3    , KC_4    , KC_5    , MO_FN   ,       MO_FN   , KC_6    , KC_7    , KC_8    , KC_9    , KC_0    , KC_UP   ,
+		D_ESC1  , KC_1    , KC_2    , KC_3    , KC_4    , KC_5    , MO_FN   ,       MO_FN   , KC_6    , KC_7    , KC_8    , KC_9    , KC_0    , KC_UP   ,
 		TT_OH   , KC_Q    , KC_W    , KC_E    , KC_R    , KC_T    , TG_PAD  ,       TG_PAD  , KC_Y    , KC_U    , KC_I    , KC_O    , KC_UNDS , KC_DOWN ,
 		KC_BSPC , KC_A    , KC_S    , KC_D    , KC_F    , KC_G    , KC_DEL  ,       KC_ESC  , KC_H    , KC_J    , KC_K    , KC_L    , KC_P    , MO_ACC  ,
-		KC_LCTRL, KC_Z    , KC_X    , KC_C    , KC_V    , KC_B    ,                           KC_N    , KC_M    , KC_COMMA, KC_DOT  , KC_QUOTE, TDN(1)  ,
+		KC_LCTRL, KC_Z    , KC_X    , KC_C    , KC_V    , KC_B    ,                           KC_N    , KC_M    , KC_COMMA, KC_DOT  , KC_QUOTE, D_CALT  ,
 		KC_LGUI , KC_LALT , MO_FN   , MO_NAV  , KC_LSFT ,           MO_MOD  ,       MO_MOD  ,           MO_SYM  , MO_NUM  , KC_LEFT , KC_RIGHT, TG_UTIL ,
 		                                        KC_ENT  , KC_TAB  , KC_SPC  ,       KC_ENT  , SFT_TAB , KC_SPC
 	),
@@ -192,13 +210,13 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 		KC_TRNS , KC_Q    , KC_W    , KC_F    , KC_P    , KC_B    , KC_TRNS ,       KC_TRNS , KC_J    , KC_L    , KC_U    , KC_Y    , KC_TRNS , KC_TRNS ,
 		KC_TRNS , KC_A    , KC_R    , KC_S    , KC_T    , KC_G    , KC_TRNS ,       KC_TRNS , KC_M    , KC_N    , KC_E    , KC_I    , KC_O    , KC_TRNS ,
 		KC_TRNS , KC_Z    , KC_X    , KC_C    , KC_D    , KC_V    ,                           KC_K    , KC_H    , KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS ,
-		KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS ,           KC_TRNS ,       TDN(2)  ,           KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS ,
+		KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS ,           KC_TRNS ,       D_COLT  ,           KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS ,
 		                                        KC_TRNS , KC_TRNS , KC_TRNS ,       KC_TRNS , KC_TRNS , KC_TRNS
 	),
 	// Modifiers:
 	[LAYER_MODS] = LAYOUT_moonlander(
 		KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS ,       KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS ,
-		KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS , TDN(3)  ,       TDN(4)  , KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS ,
+		KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS , D_PRN1  ,       D_PRN2  , KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS ,
 		KC_TRNS , KC_LSFT , KC_LGUI , KC_LALT , KC_LCTRL, KC_TRNS , ALT_TAB ,       ALT_TAB , KC_TRNS , KC_RCTRL, KC_RALT , KC_RGUI , KC_RSFT , KC_TRNS ,
 		KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS ,                           KC_TRNS , KC_VOLU , KC_VOLD , KC_MUTE , KC_TRNS , KC_TRNS ,
 		KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS ,           KC_TRNS ,       KC_TRNS ,           KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS ,
@@ -271,26 +289,26 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 	[LAYER_OH] = LAYOUT_moonlander(
 		CTRL_W  , KC_1    , KC_2    , KC_3    , ALT_F4  , KC_TRNS , KC_TRNS ,       KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS ,
 		TO_BASE , KC_4    , KC_5    , KC_6    , KC_TRNS , KC_TRNS , KC_TRNS ,       KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS ,
-		KC_TRNS , KC_7    , KC_8    , KC_9    , KC_UP   , KC_TRNS , TDN(5)  ,       KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS ,
+		KC_TRNS , KC_7    , KC_8    , KC_9    , KC_UP   , KC_TRNS , D_DEL1  ,       KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS ,
 		OSM_LCTL, KC_TRNS , KC_TRNS , KC_LEFT , KC_DOWN , KC_RIGHT,                           KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS ,
 		OSM_LGUI, OSM_LALT, KC_TRNS , KC_TRNS , KC_TRNS ,           TO_GAME ,       TO_COL  ,           KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS ,
 		                                        KC_TRNS , KC_TRNS , KC_TRNS ,       KC_TRNS , KC_TRNS , KC_TRNS
 	),
 	// Utilities:
 	[LAYER_UTIL] = LAYOUT_moonlander(
-		TDN(6)  , KC_TRNS , KC_TRNS , KC_TRNS , ALT_F4  , KC_TRNS , KC_TRNS ,       TO_BASE , KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS , USB_PAIR, RESET   ,
+		D_DEL2  , KC_TRNS , KC_TRNS , KC_TRNS , ALT_F4  , KC_TRNS , KC_TRNS ,       TO_BASE , KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS , USB_PAIR, RESET   ,
 		KC_TRNS , KC_TRNS , CTRL_W  , C_PGUP  , C_PGDN  , KC_TRNS , KC_TRNS ,       M_PLAY1 , M_REC1  , M_STOP  , KC_TRNS , KC_TRNS , TL_COLOR, KC_TRNS ,
-		KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS , TDN(7)  ,       M_PLAY2 , M_REC2  , M_STOP  , KC_TRNS , KC_TRNS , LED_LVL , KC_TRNS ,
+		KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS , D_PRN3  ,       M_PLAY2 , M_REC2  , M_STOP  , KC_TRNS , KC_TRNS , LED_LVL , KC_TRNS ,
 		KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS ,                           KC_TRNS , KC_TRNS , KC_TRNS , RGB_VAI , RGB_VAD , ON_TOP  ,
-		KC_TRNS , KC_TRNS , KC_MUTE , KC_VOLD , KC_VOLU ,           TDN(8)  ,       WIN_TAB ,           WIN_LFT , WIN_RGT , KC_TRNS , KC_TRNS , KC_TRNS ,
+		KC_TRNS , KC_TRNS , KC_MUTE , KC_VOLD , KC_VOLU ,           D_XTAB  ,       WIN_TAB ,           WIN_LFT , WIN_RGT , KC_TRNS , KC_TRNS , KC_TRNS ,
 		                                        KC_MPLY , KC_MNXT , KC_MPRV ,       KC_TRNS , KC_TRNS , KC_TRNS
 	),
 	// Pad:
 	[LAYER_PAD] = LAYOUT_moonlander(
-		TDN(9)  , KC_TRNS , KC_TRNS , KC_TRNS , TDN(10) , KC_TRNS , KC_TRNS ,       TDN(13) , KC_CIRC , KC_ASTR , KC_SLASH, KC_PERC , KC_LPRN , KC_RPRN ,
-		TDN(11) , KC_WH_U , KC_HOME , KC_UP   , KC_END  , KC_PGUP , KC_TRNS ,       KC_TRNS , KC_EQUAL, KC_7    , KC_8     , KC_9   , KC_EQUAL, KC_INS  ,
-		KC_BSPC , KC_WH_D , KC_LEFT , KC_DOWN , KC_RIGHT, KC_PGDN , TDN(12) ,       KC_BSPC , KC_PLUS , KC_4    , KC_5     , KC_6   , KC_UP   , KC_DEL  ,
-		KC_TRNS , KC_WH_L , KC_MS_L , KC_MS_U , KC_MS_R , KC_WH_R ,                           KC_MINUS, KC_1    , KC_2     , KC_3   , TDN(14) , TDN(15) ,
+		D_ESC2  , KC_TRNS , KC_TRNS , KC_TRNS , D_AF4   , KC_TRNS , KC_TRNS ,       D_CALC  , KC_CIRC , KC_ASTR , KC_SLASH, KC_PERC , KC_LPRN , KC_RPRN ,
+		D_ATAB  , KC_WH_U , KC_HOME , KC_UP   , KC_END  , KC_PGUP , KC_TRNS ,       KC_TRNS , KC_EQUAL, KC_7    , KC_8     , KC_9   , KC_EQUAL, KC_INS  ,
+		KC_BSPC , KC_WH_D , KC_LEFT , KC_DOWN , KC_RIGHT, KC_PGDN , D_DEL3  ,       KC_BSPC , KC_PLUS , KC_4    , KC_5     , KC_6   , KC_UP   , KC_DEL  ,
+		KC_TRNS , KC_WH_L , KC_MS_L , KC_MS_U , KC_MS_R , KC_WH_R ,                           KC_MINUS, KC_1    , KC_2     , KC_3   , D_LFT   , D_RGT   ,
 		KC_TRNS , KC_TRNS , KC_TRNS , KC_MS_D , KC_TRNS ,           KC_BTN3 ,       SFT_TAB ,           KC_0    , KC_DOT   , KC_COMM, KC_DOWN , KC_SCLN ,
 		                                        KC_BTN1 , KC_BTN2 , KC_TRNS ,       KC_SPC  , KC_TAB  , KC_ENT
 	),
