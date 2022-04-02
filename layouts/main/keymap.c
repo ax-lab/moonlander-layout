@@ -95,33 +95,33 @@ enum tap_dance_codes
 #define USB_PAIR WEBUSB_PAIR
 #define LED_LVL  LED_LEVEL
 
-#define ACC_A  RALT(KC_A)
-#define ACC_F  RALT(KC_F)
-#define ACC_J  RALT(KC_J)
-#define ACC_N  RALT(KC_N)
-#define ACC_S  RALT(KC_S)
-#define ACC_B  RALT(KC_B)
-#define ACC_Z  RALT(KC_Z)
-#define ACC_G  RALT(KC_G)
-#define ACC_K  RALT(KC_K)
-#define ACC_O  RALT(KC_O)
-#define ACC_T  RALT(KC_T)
-#define ACC_C  RALT(KC_C)
-#define ACC_E  RALT(KC_E)
-#define ACC_W  RALT(KC_W)
-#define ACC_H  RALT(KC_H)
-#define ACC_L  RALT(KC_L)
-#define ACC_X  RALT(KC_X)
-#define ACC_P  RALT(KC_P)
-#define ACC_R  RALT(KC_R)
-#define ACC_U  RALT(KC_U)
-#define ACC_D  RALT(KC_D)
-#define ACC_0  RALT(KC_0)
-#define ACC_Y  RALT(KC_Y)
-#define ACC_I  RALT(KC_I)
-#define ACC_M  RALT(KC_M)
-#define ACC_Q  RALT(KC_Q)
-#define ACC_V  RALT(KC_V)
+#define ACC_A  RALT(KC_A) // ä/Ä
+#define ACC_B  RALT(KC_B) // à/À
+#define ACC_C  RALT(KC_C) // á/Á
+#define ACC_D  RALT(KC_D) // â/Â
+#define ACC_E  RALT(KC_E) // ã/Ã
+#define ACC_F  RALT(KC_F) // ë/Ë
+#define ACC_G  RALT(KC_G) // è/È
+#define ACC_H  RALT(KC_H) // é/É
+#define ACC_I  RALT(KC_I) // ê/Ê
+#define ACC_J  RALT(KC_J) // ï/Ï
+#define ACC_K  RALT(KC_K) // ì/Ì
+#define ACC_L  RALT(KC_L) // í/Í
+#define ACC_M  RALT(KC_M) // î/Î
+#define ACC_N  RALT(KC_N) // ö/Ö
+#define ACC_O  RALT(KC_O) // ò/Ò
+#define ACC_P  RALT(KC_P) // ó/Ó
+#define ACC_Q  RALT(KC_Q) // ô/Ô
+#define ACC_R  RALT(KC_R) // õ/Õ
+#define ACC_S  RALT(KC_S) // ü/Ü
+#define ACC_T  RALT(KC_T) // ù/Ù
+#define ACC_U  RALT(KC_U) // ú/Ú
+#define ACC_V  RALT(KC_V) // û/Û
+#define ACC_W  RALT(KC_W) // ç/Ç
+#define ACC_X  RALT(KC_X) // ñ/Ñ
+#define ACC_Y  RALT(KC_Y) // ß/ẞ
+#define ACC_Z  RALT(KC_Z) // ¿
+#define ACC_0  RALT(KC_0) // ¡
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 	//  ________, ________, ________, ________, ________, ________, ________        ________, ________, ________, ________, ________, ________, ________,
