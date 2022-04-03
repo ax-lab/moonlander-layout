@@ -34,7 +34,7 @@ const uint8_t PROGMEM ledmap[LAYER_MAX_COUNT][DRIVER_LED_TOTAL][3] = {
 	//  Y0   Y1   Y2   Y3       <-- Right thumb
 
 	[LAYER_BASE] = {
-		ORG, RED, RED, RED, RED, // A
+		RED, RED, RED, RED, RED, // A
 		RED, PNK, PNK, PNK, RED, // B
 		RED, PNK, PNK, PNK, RED, // C
 		RED, PNK, PNK, PNK, RED, // D
@@ -94,23 +94,23 @@ const uint8_t PROGMEM ledmap[LAYER_MAX_COUNT][DRIVER_LED_TOTAL][3] = {
 	},
 
 	[LAYER_MODS] = {
-		PNK, PNK, PNK, PNK, PNK, // A
-		PNK, PNK, GRN, PNK, PNK, // B
-		PNK, PNK, GRN, PNK, PNK, // C
-		PNK, PNK, GRN, PNK, PNK, // D
-		PNK, PNK, GRN, PNK, PNK, // E
-		PNK, PNK, PNK, PNK,      // F
-		PNK, YLW, BLU,           // G
-		PNK, PNK, PNK, PNK,      // X
+		NCL, NCL, NCL, NCL, NCL, // A
+		NCL, NCL, NCL, ORG, NCL, // B
+		NCL, NCL, NCL, ORG, NCL, // C
+		NCL, NCL, NCL, ORG, NCL, // D
+		NCL, NCL, NCL, ORG, NCL, // E
+		NCL, NCL, NCL, ORG,      // F
+		NCL, NCL, NCL,           // G
+		NCL, NCL, NCL, NCL,      // X
 
-		PNK, PNK, PNK, PNK, PNK, // N
-		PNK, PNK, GRN, PNK, PNK, // M
-		PNK, PNK, GRN, ORY, PNK, // L
-		PNK, PNK, GRN, ORY, PNK, // K
-		PNK, PNK, GRN, ORY, PNK, // J
-		PNK, PNK, PNK, PNK,      // I
-		PNK, YLW, BLU,           // H
-		PNK, PNK, PNK, PNK       // Y
+		NCL, NCL, NCL, NCL, NCL, // N
+		NCL, NCL, NCL, ORG, NCL, // M
+		NCL, NCL, NCL, ORG, NCL, // L
+		NCL, NCL, NCL, ORG, NCL, // K
+		NCL, NCL, NCL, ORG, NCL, // J
+		NCL, NCL, NCL, ORG,      // I
+		NCL, NCL, NCL,           // H
+		NCL, NCL, NCL, NCL       // Y
 	},
 
 	[LAYER_SYM] = {
