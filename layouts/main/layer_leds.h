@@ -133,44 +133,24 @@ const uint8_t PROGMEM ledmap[LAYER_MAX_COUNT][DRIVER_LED_TOTAL][3] = {
 		PNK, PNK, PNK, PNK       // Y
 	},
 
-	[LAYER_NUM] = {
-		RED, BLU, RED, RED, RED, // A
-		RED, PNK, YLW, PNK, RED, // B
-		RED, PNK, YLW, PNK, RED, // C
-		RED, PNK, YLW, PNK, GRN, // D
-		RED, PNK, YLW, PNK, RED, // E
-		RED, PNK, YLW, PNK,      // F
-		RED, BLU, PNK,           // G
-		RED, RED, RED, RED,      // X
-
-		RED, RED, RED, RED, RED, // N
-		RED, PNK, YLW, PNK, RED, // M
-		RED, PNK, YLW, PNK, RED, // L
-		RED, PNK, YLW, PNK, RED, // K
-		RED, PNK, YLW, YLW, RED, // J
-		RED, PNK, PNK, PNK,      // I
-		RED, RED, RED,           // H
-		RED, RED, RED, RED       // Y
-	},
-
 	[LAYER_NAV] = {
-		BLU, BLU, PNK, BLU, BLU, // A
-		PNK, BLU, ORY, PNK, PNK, // B
-		PNK, ORY, BLU, ORY, PNK, // C
-		PNK, BLU, BLU, ORY, PNK, // D
-		PNK, ORY, BLU, ORY, PNK, // E
-		PNK, PNK, ORY, PNK,      // F
-		PNK, PNK, PNK,           // G
-		PNK, PNK, PNK, PNK,      // X
+		BLU, NCL, BLU, NCL, NCL, // A
+		GRN, NCL, NCL, NCL, NCL, // B
+		NCL, NCL, BLU, NCL, NCL, // C
+		NCL, BLU, BLU, NCL, NCL, // D
+		NCL, NCL, BLU, NCL, NCL, // E
+		NCL, NCL, NCL, NCL,      // F
+		NCL, NCL, NCL,           // G
+		NCL, NCL, NCL, NCL,      // X
 
-		PNK, PNK, PNK, PNK, PNK, // N
-		PNK, PNK, GRN, PNK, PNK, // M
-		PNK, BLU, GRN, PNK, PNK, // L
-		PNK, BLU, GRN, BLU, PNK, // K
-		PNK, BLU, GRN, BLU, GRN, // J
-		PNK, PNK, PNK, PNK,      // I
-		PNK, PNK, PNK,           // H
-		PNK, PNK, PNK, PNK       // Y
+		NCL, NCL, NCL, NCL, NCL, // N
+		NCL, NCL, NCL, NCL, NCL, // M
+		NCL, NCL, BLU, NCL, NCL, // L
+		NCL, BLU, BLU, NCL, NCL, // K
+		NCL, NCL, BLU, NCL, NCL, // J
+		NCL, NCL, NCL, NCL,      // I
+		NCL, NCL, NCL,           // H
+		NCL, NCL, NCL, NCL       // Y
 	},
 
 	[LAYER_FN] = {
