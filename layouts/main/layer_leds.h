@@ -13,7 +13,7 @@
 	+------------------------+   +------------------------+
 */
 
-const uint8_t PROGMEM ledmap[][DRIVER_LED_TOTAL][3] = {
+const uint8_t PROGMEM ledmap[LAYER_MAX_COUNT][DRIVER_LED_TOTAL][3] = {
 
 	//  A0   A1   A2   A3   A4  <-- Leftmost
 	//  B0   B1   B2   B3   B4
@@ -89,8 +89,8 @@ const uint8_t PROGMEM ledmap[][DRIVER_LED_TOTAL][3] = {
 		NCL, ORG, ORG, ORG, NCL, // K
 		NCL, ORG, ORG, ORG, NCL, // J
 		NCL, ORG, ORG, ORG,      // I
-		NCL, NCL, NCL,           // H
-		NCL, NCL, NCL, YLW       // Y
+		WHI, NCL, NCL,           // H
+		NCL, NCL, NCL, WHI       // Y
 	},
 
 	[LAYER_MODS] = {
@@ -293,6 +293,7 @@ const uint8_t PROGMEM ledmap[][DRIVER_LED_TOTAL][3] = {
 		PNK, BLU, ORY, BLU       // Y
 	},
 
+#if 0
 	// template
 	{
 		NCL, NCL, NCL, NCL, NCL, // A
@@ -313,4 +314,6 @@ const uint8_t PROGMEM ledmap[][DRIVER_LED_TOTAL][3] = {
 		NCL, NCL, NCL,           // H
 		NCL, NCL, NCL, NCL       // Y
 	},
+#endif
+
 };

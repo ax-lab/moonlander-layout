@@ -1,22 +1,25 @@
 #pragma once
 
-#define LAYER_BASE      0
-#define LAYER_GAME      1
-#define LAYER_G_TYPE    2
-#define LAYER_MODS      3
-#define LAYER_SYM       4
-#define LAYER_NUM       5
-#define LAYER_NAV       6
-#define LAYER_FN        7
-#define LAYER_ACC       8
-#define LAYER_G_MOD_A   9
-#define LAYER_G_MOD_B   10
-#define LAYER_UTIL      11
-#define LAYER_PAD       12
+enum layer_names_t {
+	LAYER_BASE = 0,
+	LAYER_GAME,
+	LAYER_G_TYPE,
+	LAYER_MODS,
+	LAYER_SYM,
+	LAYER_NUM,
+	LAYER_NAV,
+	LAYER_FN,
+	LAYER_ACC,
+	LAYER_G_MOD_A,
+	LAYER_G_MOD_B,
+	LAYER_UTIL,
+	LAYER_PAD,
+	LAYER_MAX_COUNT,
+};
 
 #define TO_BASE   TO(LAYER_BASE)
 #define TO_GAME   TO(LAYER_GAME)
-#define TG_GTYPE  TG(LAYER_G_TYPE)
+#define TO_GTYPE  TO(LAYER_G_TYPE)
 #define MO_MOD    MO(LAYER_MODS)
 #define MO_SYM    MO(LAYER_SYM)
 #define MO_NUM    MO(LAYER_NUM)
@@ -28,7 +31,7 @@
 #define TG_UTIL   TG(LAYER_UTIL)
 #define TG_PAD    TG(LAYER_PAD)
 
-const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
+const uint16_t PROGMEM keymaps[LAYER_MAX_COUNT][MATRIX_ROWS][MATRIX_COLS] = {
 	//  ________, ________, ________, ________, ________, ________, ________        ________, ________, ________, ________, ________, ________, ________,
 
 	// Base:
@@ -46,16 +49,16 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 		KC_TAB  , KC_Q    , KC_W    , KC_E    , KC_R    , KC_T    , KC_DEL  ,       KC_TRNS , KC_TRNS , KC_TRNS , KC_UP   , KC_TRNS , KC_TRNS , KC_TRNS ,
 		KC_LSFT , KC_A    , KC_S    , KC_D    , KC_F    , KC_G    , KC_BSPC ,       KC_TRNS , KC_TRNS , KC_LEFT , KC_DOWN , KC_RIGHT, KC_TRNS , KC_TRNS ,
 		KC_LCTRL, KC_Z    , KC_X    , KC_C    , KC_V    , KC_B    ,                           KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS ,
-		KC_GRAVE, KC_LALT , KC_TRNS , MO_GMA  , KC_SPC  ,           KC_ENT  ,       TG_GTYPE,           KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS ,
+		KC_GRAVE, KC_LALT , KC_TRNS , MO_GMA  , KC_SPC  ,           KC_ENT  ,       TO_GTYPE,           KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS ,
 		                                        MO_GMB  , KC_CAPS , KC_TRNS ,       KC_TRNS , KC_TRNS , KC_TRNS
 	),
 	// Game typing:
 	[LAYER_G_TYPE] = LAYOUT_moonlander(
-		KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS ,       KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS ,
+		KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS ,       TO_BASE , KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS ,
 		KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS ,       KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS ,
 		KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS ,       KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS ,
 		KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS ,                           KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS ,
-		KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS ,           KC_TRNS ,       KC_TRNS ,           KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS ,
+		KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS ,           KC_TRNS ,       TO_GAME ,           KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS ,
 		                                        KC_TRNS , KC_TRNS , KC_TRNS ,       KC_TRNS , KC_TRNS , KC_TRNS
 	),
 	// Modifiers:
