@@ -105,10 +105,10 @@ void rgb_matrix_indicators_user(void)
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record)
 {
-	static bool is_shift_pressed = false;
+	static bool is_menu_pressed = false;
 
-	if (keycode == KC_LSHIFT) {
-		is_shift_pressed = record->event.pressed;
+	if (keycode == KC_LGUI) {
+		is_menu_pressed = record->event.pressed;
 	}
 
 	output("KL: kc: 0x%04X, col: %u, row: %u, pressed: %b, time: %u, interrupt: %b, count: %u\n",
@@ -125,22 +125,77 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record)
 		return current_overlay.process(keycode, record);
 	}
 
-	if (record->event.key.col == 6 && record->event.key.row == 0 && is_shift_pressed) {
-		unregister_code(KC_LSHIFT);
+	if (record->event.key.col == 6 && record->event.key.row == 0 && is_menu_pressed) {
+		unregister_code(KC_LGUI);
 		if (!record->event.pressed) {
 			open_menu();
 		}
 		return false;
 	}
 
+	bool pressed = record->event.pressed;
+	uint32_t time = timer_read32();
+
 	switch (keycode)
 	{
-	case RGB_SLD:
-		if (record->event.pressed)
-		{
-			rgblight_mode(1);
+		case S_SHIFT: {
+			static uint32_t shift_time = 0;
+			static bool shift_alt = false;
+			if (pressed) {
+				add_key(KC_LSHIFT);
+				if ((time - shift_time) <= TAPPING_TERM) {
+					add_key(KC_LALT);
+					shift_alt = true;
+				}
+			} else {
+				del_key(KC_LSHIFT);
+				if (shift_alt) {
+					del_key(KC_LALT);
+					shift_alt = false;
+				}
+				shift_time = time;
+			}
+			send_keyboard_report();
+			return false;
 		}
-		return false;
+
+		case S_CTRL: {
+			static uint32_t ctrl_time = 0;
+			static bool ctrl_alt = false;
+			if (pressed) {
+				add_key(KC_LCTRL);
+				if ((time - ctrl_time) <= TAPPING_TERM) {
+					add_key(KC_LALT);
+					ctrl_alt = true;
+				}
+			} else {
+				del_key(KC_LCTRL);
+				if (ctrl_alt) {
+					del_key(KC_LALT);
+					ctrl_alt = false;
+				}
+				ctrl_time = time;
+			}
+			send_keyboard_report();
+			return false;
+		}
+
+		case S_SYMBOL: {
+			if (pressed) {
+				layer_on(LAYER_SYM);
+			} else {
+				layer_off(LAYER_SYM);
+			}
+			return false;
+		}
+
+		case RGB_SLD:
+			if (pressed)
+			{
+				rgblight_mode(1);
+			}
+			return false;
 	}
+
 	return true;
 }

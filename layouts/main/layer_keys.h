@@ -3,6 +3,12 @@
 enum custom_keycodes
 {
 	RGB_SLD = ML_SAFE_RANGE,
+
+	S_SHIFT,
+	S_CTRL,
+	S_SYMBOL,
+	S_NAV_L,
+	S_NAV_R,
 };
 
 #define TDN(N)   TD(DANCE_ ## N)
