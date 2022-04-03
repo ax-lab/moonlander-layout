@@ -76,7 +76,7 @@ const uint16_t PROGMEM keymaps[LAYER_MAX_COUNT][MATRIX_ROWS][MATRIX_COLS] = {
 		KC_TRNS , KC_CIRC , KC_LABK , KC_AMPR , KC_RABK , KC_TRNS , KC_TRNS ,       KC_TRNS , KC_TRNS , KC_SLASH, KC_BSLS , KC_ASTR , KC_PERC , KC_F12  ,
 		KC_TRNS , KC_GRAVE, KC_COLN , KC_EQUAL, KC_MINUS, KC_PLUS , LANG_JP ,       LANG_EN , KC_LBRC , KC_LPRN , KC_LCBR , KC_QUES , KC_SCLN , KC_TRNS ,
 		KC_TRNS , KC_DLR  , KC_PIPE , KC_DQUO , KC_EXLM , KC_TILD ,                           KC_RBRC , KC_RPRN , KC_RCBR , KC_AT   , KC_HASH , KC_TRNS ,
-		KC_TRNS , KC_TRNS , KC_TRNS , KC_F22 ,  KC_F20  ,           KC_F21  ,       KC_TRNS ,           KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS ,
+		KC_TRNS , KC_TRNS , KC_F22  , KC_F20 ,  KC_TRNS ,           KC_F21  ,       KC_TRNS ,           KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS , KC_TRNS ,
 		                                        KC_TRNS , M_PLAY1 , M_PLAY2 ,       KC_TRNS , KC_TRNS , KC_TRNS
 	),
 	// Numeric:

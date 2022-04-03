@@ -180,70 +180,103 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record)
 
 bool process_special_key(special_key_state_t *state, keyrecord_t *record)
 {
+	static bool s_ctrl   = false;
+	static bool s_shift  = false;
+	static bool s_symbol = false;
+
+	static bool s_ctrl_alt  = false;
+	static bool s_shift_alt = false;
+
+	// we need to keep track of the normal (non-special) modifier keys so
+	// that we don't cancel a pressed modifier from the mods layer
+	static bool l_ctrl  = false;
+	static bool l_shift = false;
+	static bool l_alt   = false;
+
 	bool pressed = record->event.pressed;
+
+	/*
+		For a double press to be considered the key must be pressed twice
+		in sequence (with no keys in-between) and the timing must be:
+
+			[==============]                [====/ ... /====]
+			<----- TT -----><----- TT ----->
+
+		Where TT must be less or equal to the tapping term.
+	*/
 	bool is_double_press = pressed &&
 		(state->keycode == state->prev_keycode) &&
 		(state->time - state->prev_time <= TAPPING_TERM) &&
 		(state->time - state->prev_press_time <= 2 * TAPPING_TERM);
+
+	// Double pressing CTRL and SHIFT enables the ALT key.
 	bool alt_pressed = get_mods() & MOD_MASK_ALT;
+	bool can_enable_alt = pressed && is_double_press && !alt_pressed;
 
-	switch (state->keycode)
-	{
-		case S_SHIFT: {
-			static bool shift_alt = false;
-			if (pressed) {
-				add_key(KC_LSHIFT);
-				add_mods(MOD_LSFT);
-				if (is_double_press && !alt_pressed) {
-					add_key(KC_LALT);
-					add_mods(MOD_LALT);
-					shift_alt = true;
-				}
-			} else {
-				del_key(KC_LSHIFT);
-				del_mods(MOD_LSFT);
-				if (shift_alt) {
-					del_key(KC_LALT);
-					del_mods(MOD_LALT);
-					shift_alt = false;
-				}
-			}
-			send_keyboard_report();
-			return true;
-		}
-
-		case S_CTRL: {
-			static bool ctrl_alt = false;
-			if (pressed) {
-				add_key(KC_LCTRL);
-				add_mods(MOD_LCTL);
-				if (is_double_press && !alt_pressed) {
-					add_key(KC_LALT);
-					add_mods(MOD_LALT);
-					ctrl_alt = true;
-				}
-			} else {
-				del_key(KC_LCTRL);
-				del_mods(MOD_LCTL);
-				if (ctrl_alt) {
-					del_key(KC_LALT);
-					del_mods(MOD_LALT);
-					ctrl_alt = false;
-				}
-			}
-			send_keyboard_report();
-			return true;
-		}
-
-		case S_SYMBOL: {
-			if (pressed) {
-				layer_on(LAYER_SYM);
-			} else {
-				layer_off(LAYER_SYM);
-			}
-			return true;
-		}
+	switch (state->keycode) {
+		case KC_LCTRL:
+			l_ctrl = pressed;
+			break;
+		case KC_LSHIFT:
+			l_shift = pressed;
+			break;
+		case KC_LALT:
+			l_alt = pressed;
+			break;
+		case S_CTRL:
+			s_ctrl = pressed;
+			s_ctrl_alt = can_enable_alt;
+			break;
+		case S_SHIFT:
+			s_shift = pressed;
+			s_shift_alt = can_enable_alt;
+			break;
+		case S_SYMBOL:
+			s_symbol = pressed;
+			break;
+		default:
+			return false;
 	}
 
-	return false;
+	bool enable_shift = l_shift || (s_shift && (!s_symbol || s_shift_alt));
+	bool enable_ctrl = l_ctrl || s_ctrl;
+	bool enable_alt = l_alt || s_ctrl_alt || s_shift_alt;
+
+	if (enable_shift) {
+		add_key(KC_LSHIFT);
+		add_mods(MOD_LSFT);
+	} else {
+		del_key(KC_LSHIFT);
+		del_mods(MOD_LSFT);
+	}
+
+	if (enable_ctrl) {
+		add_key(KC_LCTRL);
+		add_mods(MOD_LCTL);
+	} else {
+		del_key(KC_LCTRL);
+		del_mods(MOD_LCTL);
+	}
+
+	if (enable_alt) {
+		add_key(KC_LALT);
+		add_mods(MOD_LALT);
+	} else {
+		del_key(KC_LALT);
+		del_mods(MOD_LALT);
+	}
+
+	if (s_symbol && (s_shift && !s_shift_alt)) {
+		layer_on(LAYER_MODS);
+		layer_off(LAYER_SYM);
+	} else if (s_symbol) {
+		layer_on(LAYER_SYM);
+		layer_off(LAYER_MODS);
+	} else {
+		layer_off(LAYER_SYM);
+		layer_off(LAYER_MODS);
+	}
+
+	send_keyboard_report();
+	return true;
 }
