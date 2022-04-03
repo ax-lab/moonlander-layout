@@ -11,6 +11,10 @@
 	043 = yellow
 */
 
+// Can be used as a transparent color in the layer map, allowing the color of
+// lower layers to be maintained.
+#define NCL { 1, 1, 1 }
+
 #define RED {248, 255, 255} // #FF0036
 #define PNK {225, 255, 255} // #FF00BF
 #define GRN { 84, 255, 255} // #0AFF00

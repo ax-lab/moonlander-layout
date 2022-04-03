@@ -54,43 +54,43 @@ const uint8_t PROGMEM ledmap[][DRIVER_LED_TOTAL][3] = {
 	},
 
 	[LAYER_GAME] = {
-		RED, PNK, GRN, GRN, PNK, // A
-		PNK, PNK, BLU, PNK, GRN, // B
-		PNK, BLU, BLU, PNK, PNK, // C
-		PNK, PNK, BLU, PNK, ORY, // D
-		PNK, PNK, PNK, PNK, PNK, // E
-		PNK, PNK, PNK, PNK,      // F
-		RED, PNK, PNK,           // G
-		ORY, GRN, PNK, PNK,      // X
+		NCL, NCL, NCL, NCL, NCL, // A
+		NCL, NCL, BLU, NCL, NCL, // B
+		NCL, BLU, BLU, NCL, NCL, // C
+		NCL, NCL, BLU, NCL, NCL, // D
+		NCL, NCL, NCL, NCL, NCL, // E
+		NCL, NCL, NCL, NCL,      // F
+		NCL, NCL, NCL,           // G
+		NCL, NCL, NCL, NCL,      // X
 
-		PNK, PNK, PNK, PNK, PNK, // N
-		PNK, PNK, PNK, PNK, PNK, // M
-		PNK, PNK, BLU, PNK, PNK, // L
-		PNK, BLU, BLU, PNK, PNK, // K
-		PNK, PNK, BLU, PNK, PNK, // J
-		PNK, PNK, PNK, PNK,      // I
-		PNK, PNK, PNK,           // H
-		PNK, PNK, PNK, ORY       // Y
+		NCL, NCL, NCL, NCL, NCL, // N
+		NCL, NCL, NCL, NCL, NCL, // M
+		NCL, NCL, NCL, NCL, NCL, // L
+		NCL, NCL, NCL, NCL, NCL, // K
+		NCL, NCL, NCL, NCL, NCL, // J
+		NCL, NCL, NCL, NCL,      // I
+		WHI, NCL, NCL,           // H
+		NCL, NCL, NCL, YLW       // Y
 	},
 
 	[LAYER_G_TYPE] = {
-		BLU, BLU, BLU, GRN, GRN, // A
-		BLU, BLU, BLU, GRN, GRN, // B
-		PUR, PUR, PUR, NAV, NAV, // C
-		PUR, PUR, PUR, NAV, NAV, // D
-		PNK, PNK, PNK, ORG, ORG, // E
-		PNK, PNK, PNK, ORG,      // F
-		RED, RED, RED,           // G
-		BLU, BLU, BLU, BLU,      // X
+		NCL, NCL, NCL, NCL, NCL, // A
+		NCL, ORG, ORG, ORG, NCL, // B
+		NCL, ORG, ORG, ORG, NCL, // C
+		NCL, ORG, ORG, ORG, NCL, // D
+		NCL, ORG, ORG, ORG, NCL, // E
+		NCL, ORG, ORG, ORG,      // F
+		NCL, NCL, NCL,           // G
+		NCL, NCL, NCL, NCL,      // X
 
-		NAV, NAV, NAV, BLU, BLU, // N
-		NAV, NAV, NAV, BLU, BLU, // M
-		GRN, GRN, GRN, PUR, PUR, // L
-		GRN, GRN, GRN, PUR, PUR, // K
-		ORG, ORG, ORG, PNK, PNK, // J
-		ORG, ORG, ORG, PNK,      // I
-		RED, RED, RED,           // H
-		BLU, BLU, BLU, WHI       // Y
+		NCL, NCL, NCL, NCL, NCL, // N
+		NCL, ORG, ORG, ORG, NCL, // M
+		NCL, ORG, ORG, ORG, NCL, // L
+		NCL, ORG, ORG, ORG, NCL, // K
+		NCL, ORG, ORG, ORG, NCL, // J
+		NCL, ORG, ORG, ORG,      // I
+		NCL, NCL, NCL,           // H
+		NCL, NCL, NCL, YLW       // Y
 	},
 
 	[LAYER_MODS] = {
@@ -274,7 +274,7 @@ const uint8_t PROGMEM ledmap[][DRIVER_LED_TOTAL][3] = {
 	},
 
 	[LAYER_PAD] = {
-		RED, PNK, RED, PNK, PNK, // A
+		PUR, PNK, RED, PNK, PNK, // A
 		PNK, ORY, ORY, ORY, PNK, // B
 		PNK, PNK, BLU, BLU, PNK, // C
 		PNK, BLU, BLU, BLU, BLU, // D
@@ -291,5 +291,26 @@ const uint8_t PROGMEM ledmap[][DRIVER_LED_TOTAL][3] = {
 		PNK, PNK, PNK, PNK,      // I
 		VIO, WHI, RED,           // H
 		PNK, BLU, ORY, BLU       // Y
+	},
+
+	// template
+	{
+		NCL, NCL, NCL, NCL, NCL, // A
+		NCL, NCL, NCL, NCL, NCL, // B
+		NCL, NCL, NCL, NCL, NCL, // C
+		NCL, NCL, NCL, NCL, NCL, // D
+		NCL, NCL, NCL, NCL, NCL, // E
+		NCL, NCL, NCL, NCL,      // F
+		NCL, NCL, NCL,           // G
+		NCL, NCL, NCL, NCL,      // X
+
+		NCL, NCL, NCL, NCL, NCL, // N
+		NCL, NCL, NCL, NCL, NCL, // M
+		NCL, NCL, NCL, NCL, NCL, // L
+		NCL, NCL, NCL, NCL, NCL, // K
+		NCL, NCL, NCL, NCL, NCL, // J
+		NCL, NCL, NCL, NCL,      // I
+		NCL, NCL, NCL,           // H
+		NCL, NCL, NCL, NCL       // Y
 	},
 };
