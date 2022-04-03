@@ -103,9 +103,37 @@ void rgb_matrix_indicators_user(void)
 	set_layer_color(biton32(layer_state));
 }
 
+typedef struct {
+	uint16_t keycode;
+	uint16_t prev_keycode;
+
+	uint32_t time;
+	uint32_t prev_time;
+
+	uint32_t press_time;
+	uint32_t prev_press_time;
+} special_key_state_t;
+
+bool process_special_key(special_key_state_t *state, keyrecord_t *record);
+
 bool process_record_user(uint16_t keycode, keyrecord_t *record)
 {
 	static bool is_menu_pressed = false;
+
+	static special_key_state_t state = { 0 };
+
+	bool pressed = record->event.pressed;
+
+	state.prev_keycode = state.keycode;
+	state.keycode = keycode;
+
+	state.prev_time = state.time;
+	state.time = timer_read32();
+
+	if (pressed) {
+		state.prev_press_time = state.press_time;
+		state.press_time = state.time;
+	}
 
 	if (keycode == KC_LGUI) {
 		is_menu_pressed = record->event.pressed;
@@ -133,62 +161,12 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record)
 		return false;
 	}
 
-	bool pressed = record->event.pressed;
-	uint32_t time = timer_read32();
+	if (process_special_key(&state, record)) {
+		return false;
+	}
 
 	switch (keycode)
 	{
-		case S_SHIFT: {
-			static uint32_t shift_time = 0;
-			static bool shift_alt = false;
-			if (pressed) {
-				add_key(KC_LSHIFT);
-				if ((time - shift_time) <= TAPPING_TERM) {
-					add_key(KC_LALT);
-					shift_alt = true;
-				}
-			} else {
-				del_key(KC_LSHIFT);
-				if (shift_alt) {
-					del_key(KC_LALT);
-					shift_alt = false;
-				}
-				shift_time = time;
-			}
-			send_keyboard_report();
-			return false;
-		}
-
-		case S_CTRL: {
-			static uint32_t ctrl_time = 0;
-			static bool ctrl_alt = false;
-			if (pressed) {
-				add_key(KC_LCTRL);
-				if ((time - ctrl_time) <= TAPPING_TERM) {
-					add_key(KC_LALT);
-					ctrl_alt = true;
-				}
-			} else {
-				del_key(KC_LCTRL);
-				if (ctrl_alt) {
-					del_key(KC_LALT);
-					ctrl_alt = false;
-				}
-				ctrl_time = time;
-			}
-			send_keyboard_report();
-			return false;
-		}
-
-		case S_SYMBOL: {
-			if (pressed) {
-				layer_on(LAYER_SYM);
-			} else {
-				layer_off(LAYER_SYM);
-			}
-			return false;
-		}
-
 		case RGB_SLD:
 			if (pressed)
 			{
@@ -198,4 +176,74 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record)
 	}
 
 	return true;
+}
+
+bool process_special_key(special_key_state_t *state, keyrecord_t *record)
+{
+	bool pressed = record->event.pressed;
+	bool is_double_press = pressed &&
+		(state->keycode == state->prev_keycode) &&
+		(state->time - state->prev_time <= TAPPING_TERM) &&
+		(state->time - state->prev_press_time <= 2 * TAPPING_TERM);
+	bool alt_pressed = get_mods() & MOD_MASK_ALT;
+
+	switch (state->keycode)
+	{
+		case S_SHIFT: {
+			static bool shift_alt = false;
+			if (pressed) {
+				add_key(KC_LSHIFT);
+				add_mods(MOD_LSFT);
+				if (is_double_press && !alt_pressed) {
+					add_key(KC_LALT);
+					add_mods(MOD_LALT);
+					shift_alt = true;
+				}
+			} else {
+				del_key(KC_LSHIFT);
+				del_mods(MOD_LSFT);
+				if (shift_alt) {
+					del_key(KC_LALT);
+					del_mods(MOD_LALT);
+					shift_alt = false;
+				}
+			}
+			send_keyboard_report();
+			return true;
+		}
+
+		case S_CTRL: {
+			static bool ctrl_alt = false;
+			if (pressed) {
+				add_key(KC_LCTRL);
+				add_mods(MOD_LCTL);
+				if (is_double_press && !alt_pressed) {
+					add_key(KC_LALT);
+					add_mods(MOD_LALT);
+					ctrl_alt = true;
+				}
+			} else {
+				del_key(KC_LCTRL);
+				del_mods(MOD_LCTL);
+				if (ctrl_alt) {
+					del_key(KC_LALT);
+					del_mods(MOD_LALT);
+					ctrl_alt = false;
+				}
+			}
+			send_keyboard_report();
+			return true;
+		}
+
+		case S_SYMBOL: {
+			if (pressed) {
+				layer_on(LAYER_SYM);
+			} else {
+				layer_off(LAYER_SYM);
+			}
+			return true;
+		}
+	}
+
+	return false;
 }
