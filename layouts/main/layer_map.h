@@ -6,7 +6,8 @@ enum layer_names_t {
 	LAYER_G_TYPE,
 	LAYER_MODS,
 	LAYER_SYM,
-	LAYER_NAV,
+	LAYER_NAV_L,
+	LAYER_NAV_R,
 	LAYER_FN,
 	LAYER_ACC,
 	LAYER_G_MOD_A,
@@ -21,7 +22,8 @@ enum layer_names_t {
 #define TO_GTYPE  TO(LAYER_G_TYPE)
 #define MO_MOD    MO(LAYER_MODS)
 #define MO_SYM    MO(LAYER_SYM)
-#define MO_NAV    MO(LAYER_NAV)
+#define MO_NAV_L  MO(LAYER_NAV_L)
+#define MO_NAV_R  MO(LAYER_NAV_R)
 #define MO_FN     MO(LAYER_FN)
 #define MO_ACC    MO(LAYER_ACC)
 #define MO_GMA    MO(LAYER_G_MOD_A)
@@ -38,7 +40,7 @@ const uint16_t PROGMEM keymaps[LAYER_MAX_COUNT][MATRIX_ROWS][MATRIX_COLS] = {
 		KC_TAB  , KC_Q    , KC_W    , KC_E    , KC_R    , KC_T    , TG_PAD  ,       TG_PAD  , KC_Y    , KC_U    , KC_I    , KC_O    , KC_UNDS , KC_DOWN ,
 		KC_BSPC , KC_A    , KC_S    , KC_D    , KC_F    , KC_G    , KC_DEL  ,       KC_ESC  , KC_H    , KC_J    , KC_K    , KC_L    , KC_P    , MO_ACC  ,
 		S_CTRL  , KC_Z    , KC_X    , KC_C    , KC_V    , KC_B    ,                           KC_N    , KC_M    , KC_COMMA, KC_DOT  , KC_QUOTE, KC_LCTRL,
-		KC_LGUI , KC_LALT , MO_FN   , MO_NAV  , S_SHIFT ,           MO_MOD  ,       MO_MOD  ,           S_SYMBOL, MO_NAV  , KC_LEFT , KC_RIGHT, TG_UTIL ,
+		KC_LGUI , KC_LALT , MO_FN   , MO_NAV_L, S_SHIFT ,           MO_MOD  ,       MO_MOD  ,           S_SYMBOL, MO_NAV_R, KC_LEFT , KC_RIGHT, TG_UTIL ,
 		                                        KC_ENT  , KC_TAB  , KC_SPC  ,       KC_ENT  , SFT_TAB , KC_SPC
 	),
 	// Game:
@@ -64,7 +66,7 @@ const uint16_t PROGMEM keymaps[LAYER_MAX_COUNT][MATRIX_ROWS][MATRIX_COLS] = {
 		_______ , _______ , _______ , _______ , _______ , _______ , _______ ,       _______ , _______ , _______ , _______ , _______ , _______ , _______ ,
 		_______ , KC_F1   , KC_F2   , KC_F3   , KC_F4   , KC_F5   , _______ ,       _______ , KC_F6   , KC_F7   , KC_F8   , KC_F9   , KC_F10  , KC_F11  ,
 		_______ , KC_1    , KC_2    , KC_3    , KC_4    , KC_5    , _______ ,       _______ , KC_6    , KC_7    , KC_8    , KC_9    , KC_0    , KC_F12  ,
-		_______ , KC_LGUI , KC_LSFT , KC_LALT , KC_LCTRL, ALT_TAB ,                           ALT_TAB , KC_RCTRL, KC_RALT , KC_RSFT , KC_RGUI , _______ ,
+		_______ , KC_LGUI , KC_LSFT , KC_LALT , KC_LCTRL, ALT_TAB ,                           ALT_TAB , KC_LCTRL, KC_LALT , KC_LSFT , KC_LGUI , _______ ,
 		_______ , _______ , _______ , _______ , _______ ,           _______ ,       _______ ,           _______ , _______ , _______ , _______ , _______ ,
 		                                        _______ , _______ , _______ ,       _______ , _______ , _______
 	),
@@ -78,11 +80,19 @@ const uint16_t PROGMEM keymaps[LAYER_MAX_COUNT][MATRIX_ROWS][MATRIX_COLS] = {
 		                                        _______ , M_PLAY1 , M_PLAY2 ,       _______ , _______ , _______
 	),
 	// Navigation:
-	[LAYER_NAV] = LAYOUT_moonlander(
+	[LAYER_NAV_L] = LAYOUT_moonlander(
 		ON_TOP  , KC_MPLY , KC_MPRV , KC_MNXT , _______ , _______ , _______ ,       _______ , _______ , _______ , _______ , _______ , _______ , _______ ,
-		WIN_LFT , WIN_RGT , _______ , KC_UP   , KC_PGUP , _______ , _______ ,       _______ , _______ , KC_PGUP , KC_UP   , _______ , _______ , _______ ,
-		ALT_TAB , KC_END  , KC_LEFT , KC_DOWN , KC_RIGHT, KC_HOME , _______ ,       _______ , KC_HOME , KC_LEFT , KC_DOWN , KC_RIGHT, KC_END  , KC_F12  ,
-		_______ , _______ , KC_MINUS, KC_EQUAL, KC_PGDN , _______ ,                           _______ , KC_PGDN , KC_EQUAL, KC_MINUS, _______ , _______ ,
+		WIN_LFT , WIN_RGT , _______ , KC_UP   , KC_PGUP , _______ , _______ ,       _______ , _______ , _______ , _______ , _______ , _______ , _______ ,
+		ALT_TAB , KC_HOME , KC_LEFT , KC_DOWN , KC_RIGHT, KC_END  , _______ ,       _______ , _______ , KC_LCTRL, KC_LALT , KC_LSFT , KC_LGUI , _______ ,
+		_______ , _______ , KC_MINUS, KC_EQUAL, KC_PGDN , _______ ,                           _______ , KC_RCTRL, KC_RALT , KC_RSFT , KC_RGUI , _______ ,
+		_______ , _______ , _______ , _______ , _______ ,           _______ ,       _______ ,           _______ , _______ , _______ , _______ , _______ ,
+		                                        _______ , _______ , _______ ,       _______ , _______ , _______
+	),
+	[LAYER_NAV_R] = LAYOUT_moonlander(
+		_______ , _______ , _______ , _______ , _______ , _______ , _______ ,       _______ , _______ , _______ , _______ , _______ , _______ , _______ ,
+		_______ , _______ , _______ , _______ , _______ , _______ , _______ ,       _______ , _______ , KC_PGUP , KC_UP   , _______ , _______ , _______ ,
+		_______ , KC_LGUI , KC_LSFT , KC_LALT , KC_LCTRL, _______ , _______ ,       _______ , KC_HOME , KC_LEFT , KC_DOWN , KC_RIGHT, KC_END  , KC_F12  ,
+		_______ , KC_RGUI , KC_RSFT , KC_RALT , KC_RCTRL , _______ ,                           _______ , KC_PGDN , KC_EQUAL, KC_MINUS, _______ , _______ ,
 		_______ , _______ , _______ , _______ , _______ ,           _______ ,       _______ ,           _______ , _______ , _______ , _______ , _______ ,
 		                                        _______ , _______ , _______ ,       _______ , _______ , _______
 	),

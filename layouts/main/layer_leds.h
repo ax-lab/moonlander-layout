@@ -133,12 +133,32 @@ const uint8_t PROGMEM ledmap[LAYER_MAX_COUNT][DRIVER_LED_TOTAL][3] = {
 		PNK, PNK, PNK, PNK       // Y
 	},
 
-	[LAYER_NAV] = {
+	[LAYER_NAV_L] = {
 		BLU, NCL, BLU, NCL, NCL, // A
 		GRN, NCL, NCL, NCL, NCL, // B
 		NCL, NCL, BLU, NCL, NCL, // C
 		NCL, BLU, BLU, NCL, NCL, // D
 		NCL, NCL, BLU, NCL, NCL, // E
+		NCL, NCL, NCL, NCL,      // F
+		NCL, NCL, NCL,           // G
+		NCL, NCL, NCL, NCL,      // X
+
+		NCL, NCL, NCL, NCL, NCL, // N
+		NCL, NCL, GRN, NCL, NCL, // M
+		NCL, NCL, GRN, NCL, NCL, // L
+		NCL, NCL, GRN, NCL, NCL, // K
+		NCL, NCL, GRN, NCL, NCL, // J
+		NCL, NCL, NCL, NCL,      // I
+		NCL, NCL, NCL,           // H
+		NCL, NCL, NCL, NCL       // Y
+	},
+
+	[LAYER_NAV_R] = {
+		NCL, NCL, NCL, NCL, NCL, // A
+		NCL, NCL, GRN, NCL, NCL, // B
+		NCL, NCL, GRN, NCL, NCL, // C
+		NCL, NCL, GRN, NCL, NCL, // D
+		NCL, NCL, GRN, NCL, NCL, // E
 		NCL, NCL, NCL, NCL,      // F
 		NCL, NCL, NCL,           // G
 		NCL, NCL, NCL, NCL,      // X
