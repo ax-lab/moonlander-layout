@@ -36,11 +36,11 @@ const uint16_t PROGMEM keymaps[LAYER_MAX_COUNT][MATRIX_ROWS][MATRIX_COLS] = {
 
 	// Base:
 	[LAYER_BASE] = LAYOUT_moonlander(
-		D_ESC   , KC_1    , KC_2    , KC_3    , KC_4    , KC_5    , MO_FN   ,       MO_FN   , KC_6    , KC_7    , KC_8    , KC_9    , KC_0    , KC_UP   ,
-		KC_TAB  , KC_Q    , KC_W    , KC_E    , KC_R    , KC_T    , TG_PAD  ,       TG_PAD  , KC_Y    , KC_U    , KC_I    , KC_O    , KC_UNDS , KC_DOWN ,
-		KC_BSPC , KC_A    , KC_S    , KC_D    , KC_F    , KC_G    , KC_DEL  ,       KC_ESC  , KC_H    , KC_J    , KC_K    , KC_L    , KC_P    , MO_ACC  ,
-		S_CTRL  , KC_Z    , KC_X    , KC_C    , KC_V    , KC_B    ,                           KC_N    , KC_M    , KC_COMMA, KC_DOT  , KC_QUOTE, KC_LCTRL,
-		KC_LALT , KC_LGUI , MO_FN   , MO_NAV_L, S_SHIFT ,           MO_MOD  ,       MO_MOD  ,           S_SYMBOL, MO_NAV_R, KC_LEFT , KC_RIGHT, TG_UTIL ,
+		D_ESC   , KC_1    , KC_2    , KC_3    , KC_4    , KC_5    , MO_FN   ,       MO_FN   , KC_6    , KC_7    , KC_8    , KC_9    , KC_0    , TG_UTIL ,
+		KC_TAB  , KC_Q    , KC_W    , KC_E    , KC_R    , KC_T    , TG_PAD  ,       TG_PAD  , KC_Y    , KC_U    , KC_I    , KC_O    , KC_MINS , KC_EQUAL,
+		KC_BSPC , KC_A    , KC_S    , KC_D    , KC_F    , KC_G    , KC_DEL  ,       KC_ESC  , KC_H    , KC_J    , KC_K    , KC_L    , KC_P    , KC_SCLN ,
+		S_CTRL  , KC_Z    , KC_X    , KC_C    , KC_V    , KC_B    ,                           KC_N    , KC_M    , KC_COMMA, KC_DOT  , KC_QUOTE, KC_UP   ,
+		KC_LALT , KC_LGUI , MO_FN   , MO_NAV_L, S_SHIFT ,           MO_MOD  ,       MO_MOD  ,           S_SYMBOL, MO_NAV_R, KC_LEFT , KC_RIGHT, KC_DOWN ,
 		                                        KC_ENT  , KC_TAB  , KC_SPC  ,       KC_ENT  , SFT_TAB , KC_SPC
 	),
 	// Game:
@@ -72,11 +72,11 @@ const uint16_t PROGMEM keymaps[LAYER_MAX_COUNT][MATRIX_ROWS][MATRIX_COLS] = {
 	),
 	// Symbols:
 	[LAYER_SYM] = LAYOUT_moonlander(
-		_______ , KC_F1   , KC_F2   , KC_F3   , KC_F4   , KC_F5   , _______ ,       _______ , KC_F6   , KC_F7   , KC_F8   , KC_F9   , KC_F10  , KC_F11  ,
-		_______ , KC_CIRC , KC_LABK , KC_AMPR , KC_RABK , _______ , _______ ,       _______ , _______ , KC_SLASH, KC_BSLS , KC_ASTR , KC_PERC , KC_F12  ,
-		_______ , KC_GRAVE, KC_COLN , KC_EQUAL, KC_MINUS, KC_PLUS , LANG_JP ,       LANG_EN , KC_LBRC , KC_LPRN , KC_LCBR , KC_QUES , KC_SCLN , _______ ,
-		_______ , KC_DLR  , KC_PIPE , KC_DQUO , KC_EXLM , KC_TILD ,                           KC_RBRC , KC_RPRN , KC_RCBR , KC_AT   , KC_HASH , _______ ,
-		_______ , _______ , KC_F22  , KC_F20 ,  _______ ,           KC_F21  ,       _______ ,           _______ , _______ , _______ , _______ , _______ ,
+		_______ , _______ , _______ , _______ , _______ , _______ , _______ ,       _______ , _______ , _______ , _______ , _______ , _______ , _______ ,
+		_______ , KC_TILD , KC_CIRC , KC_AMPR , KC_HASH , _______ , _______ ,       _______ , _______ , KC_LBRC , KC_RBRC , KC_PLUS , KC_MINUS, _______ ,
+		_______ , KC_AT   , KC_DLR  , KC_PIPE , KC_COLN , KC_EXLM , LANG_JP ,       LANG_EN , KC_QUES , KC_LPRN , KC_RPRN , KC_GRAVE, KC_PERC , KC_MINUS,
+		_______ , _______ , KC_ASTR , KC_SLASH, KC_BSLS , _______ ,                           _______ , KC_LCBR , KC_RCBR , KC_EQUAL, KC_DQUO , KC_PGUP ,
+		_______ , _______ , _______ , KC_F22  ,  KC_F20 ,           KC_F21  ,       _______ ,           _______ , _______ , KC_HOME , KC_END  , KC_PGDN ,
 		                                        _______ , M_PLAY1 , M_PLAY2 ,       _______ , _______ , _______
 	),
 	// Navigation:
@@ -92,7 +92,7 @@ const uint16_t PROGMEM keymaps[LAYER_MAX_COUNT][MATRIX_ROWS][MATRIX_COLS] = {
 		_______ , _______ , _______ , _______ , _______ , _______ , _______ ,       _______ , _______ , _______ , _______ , _______ , _______ , _______ ,
 		_______ , _______ , _______ , _______ , _______ , _______ , _______ ,       _______ , _______ , KC_PGUP , KC_UP   , _______ , _______ , _______ ,
 		_______ , KC_LGUI , KC_LSFT , KC_LALT , KC_LCTRL, _______ , _______ ,       _______ , KC_HOME , KC_LEFT , KC_DOWN , KC_RIGHT, KC_END  , KC_F12  ,
-		_______ , KC_RGUI , KC_RSFT , KC_RALT , KC_RCTRL , _______ ,                           _______ , KC_PGDN , KC_EQUAL, KC_MINUS, _______ , _______ ,
+		_______ , KC_RGUI , KC_RSFT , KC_RALT , KC_RCTRL, _______ ,                           _______ , KC_PGDN , KC_EQUAL, KC_MINUS, _______ , _______ ,
 		_______ , _______ , _______ , _______ , _______ ,           _______ ,       _______ ,           _______ , _______ , _______ , _______ , _______ ,
 		                                        _______ , _______ , _______ ,       _______ , _______ , _______
 	),
@@ -134,11 +134,11 @@ const uint16_t PROGMEM keymaps[LAYER_MAX_COUNT][MATRIX_ROWS][MATRIX_COLS] = {
 	),
 	// Utilities:
 	[LAYER_UTIL] = LAYOUT_moonlander(
-		_______ , _______ , _______ , _______ , ALT_F4  , _______ , _______ ,       TO_BASE , _______ , _______ , _______ , _______ , USB_PAIR, RESET   ,
+		_______ , _______ , _______ , _______ , ALT_F4  , _______ , _______ ,       TO_BASE , _______ , _______ , _______ , _______ , USB_PAIR, _______ ,
 		_______ , _______ , CTRL_W  , C_PGUP  , C_PGDN  , _______ , _______ ,       M_PLAY1 , M_REC1  , M_STOP  , _______ , _______ , TL_COLOR, _______ ,
 		_______ , _______ , _______ , _______ , _______ , _______ , D_PRN   ,       M_PLAY2 , M_REC2  , M_STOP  , _______ , _______ , LED_LVL , _______ ,
-		_______ , _______ , _______ , _______ , _______ , _______ ,                           _______ , _______ , _______ , RGB_VAI , RGB_VAD , ON_TOP  ,
-		_______ , _______ , KC_MUTE , KC_VOLD , KC_VOLU ,           _______ ,       WIN_TAB ,           WIN_LFT , WIN_RGT , _______ , _______ , _______ ,
+		_______ , _______ , _______ , _______ , _______ , _______ ,                           _______ , _______ , _______ , RGB_VAI , RGB_VAD , _______ ,
+		_______ , _______ , KC_MUTE , KC_VOLD , KC_VOLU ,           _______ ,       _______ ,           _______ , _______ , _______ , _______ , RESET   ,
 		                                        KC_MPLY , KC_MNXT , KC_MPRV ,       _______ , _______ , _______
 	),
 	// Pad:
