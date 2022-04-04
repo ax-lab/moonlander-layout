@@ -40,7 +40,7 @@ const uint16_t PROGMEM keymaps[LAYER_MAX_COUNT][MATRIX_ROWS][MATRIX_COLS] = {
 		KC_TAB  , KC_Q    , KC_W    , KC_E    , KC_R    , KC_T    , TG_PAD  ,       TG_PAD  , KC_Y    , KC_U    , KC_I    , KC_O    , KC_UNDS , KC_DOWN ,
 		KC_BSPC , KC_A    , KC_S    , KC_D    , KC_F    , KC_G    , KC_DEL  ,       KC_ESC  , KC_H    , KC_J    , KC_K    , KC_L    , KC_P    , MO_ACC  ,
 		S_CTRL  , KC_Z    , KC_X    , KC_C    , KC_V    , KC_B    ,                           KC_N    , KC_M    , KC_COMMA, KC_DOT  , KC_QUOTE, KC_LCTRL,
-		KC_LGUI , KC_LALT , MO_FN   , MO_NAV_L, S_SHIFT ,           MO_MOD  ,       MO_MOD  ,           S_SYMBOL, MO_NAV_R, KC_LEFT , KC_RIGHT, TG_UTIL ,
+		KC_LALT , KC_LGUI , MO_FN   , MO_NAV_L, S_SHIFT ,           MO_MOD  ,       MO_MOD  ,           S_SYMBOL, MO_NAV_R, KC_LEFT , KC_RIGHT, TG_UTIL ,
 		                                        KC_ENT  , KC_TAB  , KC_SPC  ,       KC_ENT  , SFT_TAB , KC_SPC
 	),
 	// Game:
@@ -144,10 +144,10 @@ const uint16_t PROGMEM keymaps[LAYER_MAX_COUNT][MATRIX_ROWS][MATRIX_COLS] = {
 	// Pad:
 	[LAYER_PAD] = LAYOUT_moonlander(
 		TO_GAME , _______ , _______ , _______ , _______ , _______ , _______ ,       _______ , KC_CIRC , KC_ASTR , KC_SLASH, KC_PERC , KC_LPRN , KC_RPRN ,
-		ALT_TAB , KC_WH_U , KC_HOME , KC_UP   , KC_END  , KC_PGUP , _______ ,       _______ , KC_EQUAL, KC_7    , KC_8     , KC_9   , KC_EQUAL, KC_INS  ,
-		KC_BSPC , KC_WH_D , KC_LEFT , KC_DOWN , KC_RIGHT, KC_PGDN , _______ ,       KC_BSPC , KC_PLUS , KC_4    , KC_5     , KC_6   , KC_UP   , KC_DEL  ,
-		_______ , KC_WH_L , KC_MS_L , KC_MS_U , KC_MS_R , KC_WH_R ,                           KC_MINUS, KC_1    , KC_2     , KC_3   , KC_LEFT , KC_RIGHT,
-		_______ , _______ , _______ , KC_MS_D , _______ ,           KC_BTN3 ,       SFT_TAB ,           KC_0    , KC_DOT   , KC_COMM, KC_DOWN , KC_SCLN ,
+		ALT_TAB , KC_WH_U , KC_HOME , KC_UP   , KC_END  , KC_PGUP , _______ ,       _______ , KC_EQUAL, KC_KP_7 , KC_KP_8 , KC_KP_9 , KC_EQUAL, KC_INS  ,
+		KC_BSPC , KC_WH_D , KC_LEFT , KC_DOWN , KC_RIGHT, KC_PGDN , _______ ,       KC_BSPC , KC_PLUS , KC_KP_4 , KC_KP_5 , KC_KP_6 , KC_UP   , KC_DEL  ,
+		_______ , KC_WH_L , KC_MS_L , KC_MS_U , KC_MS_R , KC_WH_R ,                           KC_MINUS, KC_KP_1 , KC_KP_2 , KC_KP_3 , KC_LEFT , KC_RIGHT,
+		_______ , _______ , _______ , KC_MS_D , _______ ,           KC_BTN3 ,       SFT_TAB ,           KC_KP_0 , KC_COMM , KC_DOT  , KC_DOWN , KC_SCLN ,
 		                                        KC_BTN1 , KC_BTN2 , _______ ,       KC_SPC  , KC_TAB  , KC_ENT
 	),
 
