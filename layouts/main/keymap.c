@@ -88,8 +88,18 @@ void set_layer_color(int layer)
 	}
 }
 
+// Defined at moonlander.c
+extern bool is_launching;
+extern bool mcp23018_leds[3];
+
 void rgb_matrix_indicators_user(void)
 {
+	if (!is_launching) {
+		led_t led_state = host_keyboard_led_state();
+		ML_LED_5(!led_state.num_lock);
+		ML_LED_6(led_state.caps_lock);
+	}
+
 	if (g_suspend_state || keyboard_config.disable_layer_led)
 	{
 		return;
