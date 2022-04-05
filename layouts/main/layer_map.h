@@ -3,6 +3,7 @@
 enum layer_names_t {
 	LAYER_BASE = 0,
 	LAYER_GAME,
+	LAYER_G_MOD,
 	LAYER_G_TYPE,
 	LAYER_MODS,
 	LAYER_SYM,
@@ -10,8 +11,6 @@ enum layer_names_t {
 	LAYER_NAV_R,
 	LAYER_FN,
 	LAYER_ACC,
-	LAYER_G_MOD_A,
-	LAYER_G_MOD_B,
 	LAYER_UTIL,
 	LAYER_PAD,
 	LAYER_MAX_COUNT,
@@ -19,6 +18,7 @@ enum layer_names_t {
 
 #define TO_BASE   TO(LAYER_BASE)
 #define TO_GAME   TO(LAYER_GAME)
+#define MO_GMOD   MO(LAYER_G_MOD)
 #define TO_GTYPE  TO(LAYER_G_TYPE)
 #define MO_MOD    MO(LAYER_MODS)
 #define MO_SYM    MO(LAYER_SYM)
@@ -26,8 +26,6 @@ enum layer_names_t {
 #define MO_NAV_R  MO(LAYER_NAV_R)
 #define MO_FN     MO(LAYER_FN)
 #define MO_ACC    MO(LAYER_ACC)
-#define MO_GMA    MO(LAYER_G_MOD_A)
-#define MO_GMB    MO(LAYER_G_MOD_B)
 #define TG_UTIL   TG(LAYER_UTIL)
 #define TG_PAD    TG(LAYER_PAD)
 
@@ -37,7 +35,7 @@ const uint16_t PROGMEM keymaps[LAYER_MAX_COUNT][MATRIX_ROWS][MATRIX_COLS] = {
 	// Base:
 	[LAYER_BASE] = LAYOUT_moonlander(
 		D_ESC   , KC_1    , KC_2    , KC_3    , KC_4    , KC_5    , MO_FN   ,       MO_FN   , KC_6    , KC_7    , KC_8    , KC_9    , KC_0    , TG_UTIL ,
-		KC_TAB  , KC_Q    , KC_W    , KC_E    , KC_R    , KC_T    , TG_PAD  ,       TG_PAD  , KC_Y    , KC_U    , KC_I    , KC_O    , KC_MINS , KC_EQUAL,
+		KC_TAB  , KC_Q    , KC_W    , KC_E    , KC_R    , KC_T    , _______ ,       TG_PAD  , KC_Y    , KC_U    , KC_I    , KC_O    , KC_MINS , KC_EQUAL,
 		KC_BSPC , KC_A    , KC_S    , KC_D    , KC_F    , KC_G    , KC_DEL  ,       KC_ESC  , KC_H    , KC_J    , KC_K    , KC_L    , KC_P    , KC_SCLN ,
 		S_CTRL  , KC_Z    , KC_X    , KC_C    , KC_V    , KC_B    ,                           KC_N    , KC_M    , KC_COMMA, KC_DOT  , KC_QUOTE, KC_UP   ,
 		KC_LALT , KC_LGUI , MO_FN   , MO_NAV_L, S_SHIFT ,           MO_MOD  ,       MO_MOD  ,           S_SYMBOL, MO_NAV_R, KC_LEFT , KC_RIGHT, KC_DOWN ,
@@ -45,12 +43,21 @@ const uint16_t PROGMEM keymaps[LAYER_MAX_COUNT][MATRIX_ROWS][MATRIX_COLS] = {
 	),
 	// Game:
 	[LAYER_GAME] = LAYOUT_moonlander(
-		KC_ESC  , KC_1    , KC_2    , KC_3    , KC_4    , KC_5    , KC_PAUSE,       TO_BASE , KC_6    , KC_7    , KC_8    , KC_9    , KC_0    , _______ ,
-		KC_TAB  , KC_Q    , KC_W    , KC_E    , KC_R    , KC_T    , KC_DEL  ,       _______ , _______ , _______ , KC_UP   , _______ , _______ , _______ ,
-		KC_LSFT , KC_A    , KC_S    , KC_D    , KC_F    , KC_G    , KC_BSPC ,       _______ , _______ , KC_LEFT , KC_DOWN , KC_RIGHT, _______ , _______ ,
-		KC_LCTRL, KC_Z    , KC_X    , KC_C    , KC_V    , KC_B    ,                           _______ , _______ , _______ , _______ , _______ , _______ ,
-		KC_GRAVE, KC_LALT , _______ , MO_GMA  , KC_SPC  ,           KC_ENT  ,       TO_GTYPE,           _______ , _______ , _______ , _______ , _______ ,
-		                                        MO_GMB  , KC_CAPS , _______ ,       _______ , _______ , _______
+		KC_ESC  , _______ , _______ , _______ , _______ , _______ , KC_PAUSE,       TO_BASE , _______ , _______ , _______ , _______ , _______ , _______ ,
+		KC_CAPS , _______ , _______ , _______ , _______ , _______ , _______ ,       _______ , _______ , _______ , _______ , _______ , _______ , _______ ,
+		KC_TAB  , _______ , _______ , _______ , _______ , _______ , KC_DEL  ,       _______ , _______ , _______ , _______ , _______ , _______ , _______ ,
+		KC_LCTRL, _______ , _______ , _______ , _______ , _______ ,                           _______ , _______ , _______ , _______ , _______ , _______ ,
+		KC_LALT , KC_GRAVE, _______ , MO_GMOD , KC_LSFT ,           KC_ENT  ,       TO_GTYPE,           _______ , _______ , _______ , _______ , _______ ,
+		                                        KC_SPC  , KC_BSPC , KC_ESC  ,       _______ , _______ , _______
+	),
+	// Game mod:
+	[LAYER_G_MOD] = LAYOUT_moonlander(
+		_______ , KC_F10  , KC_F11  , KC_F12  , _______ , _______ , _______ ,       _______ , _______ , _______ , _______ , _______ , _______ , _______ ,
+		_______ , KC_F1   , KC_F2   , KC_F3   , _______ , _______ , _______ ,       _______ , _______ , KC_KP_7 , KC_KP_8 , KC_KP_9 , _______ , _______ ,
+		_______ , KC_F4   , KC_F5   , KC_F6   , _______ , _______ , _______ ,       _______ , _______ , KC_KP_4 , KC_KP_5 , KC_KP_6 , _______ , _______ ,
+		_______ , KC_F7   , KC_F8   , KC_F9   , _______ , _______ ,                           KC_NLCK , KC_KP_1 , KC_KP_2 , KC_KP_3 , _______ , _______ ,
+		_______ , _______ , _______ , _______ , _______ ,           _______ ,       _______ ,           KC_KP_0 , _______ , _______ , _______ , _______ ,
+		                                        _______ , _______ , _______ ,       _______ , _______ , _______
 	),
 	// Game typing:
 	[LAYER_G_TYPE] = LAYOUT_moonlander(
@@ -114,27 +121,9 @@ const uint16_t PROGMEM keymaps[LAYER_MAX_COUNT][MATRIX_ROWS][MATRIX_COLS] = {
 		_______ , _______ , _______ , _______ , _______ ,           _______ ,       _______ ,           _______ , _______ , _______ , _______ , _______ ,
 		                                        _______ , _______ , _______ ,       _______ , _______ , _______
 	),
-	// Game mod A:
-	[LAYER_G_MOD_A] = LAYOUT_moonlander(
-		TO_BASE , KC_F1   , KC_F2   , KC_F3   , KC_F4   , KC_F5   , _______ ,       _______ , KC_F6   , KC_F7   , KC_F8   , KC_F9   , KC_F10  , KC_F11  ,
-		_______ , KC_7    , KC_8    , KC_9    , _______ , _______ , _______ ,       _______ , _______ , _______ , _______ , _______ , _______ , KC_F12  ,
-		KC_0    , KC_4    , KC_5    , KC_6    , KC_EQUAL, _______ , _______ ,       _______ , _______ , _______ , _______ , _______ , _______ , _______ ,
-		_______ , KC_1    , KC_2    , KC_3    , KC_MINUS, _______ ,                           _______ , _______ , _______ , _______ , _______ , _______ ,
-		_______ , _______ , _______ , _______ , _______ ,           _______ ,       _______ ,           _______ , _______ , _______ , _______ , _______ ,
-		                                        _______ , _______ , _______ ,       _______ , _______ , _______
-	),
-	// Game mod B:
-	[LAYER_G_MOD_B] = LAYOUT_moonlander(
-		_______ , _______ , _______ , _______ , _______ , _______ , _______ ,       _______ , _______ , _______ , _______ , _______ , _______ , _______ ,
-		KC_F12  , KC_F7   , KC_F8   , KC_F9   , _______ , KC_UP   , _______ ,       _______ , _______ , _______ , _______ , _______ , _______ , _______ ,
-		KC_F11  , KC_F4   , KC_F5   , KC_F6   , KC_LEFT , KC_RIGHT, _______ ,       _______ , _______ , _______ , _______ , _______ , _______ , _______ ,
-		KC_F10  , KC_F1   , KC_F2   , KC_F3   , _______ , KC_DOWN ,                           _______ , _______ , _______ , _______ , _______ , _______ ,
-		_______ , _______ , _______ , _______ , _______ ,           _______ ,       _______ ,           _______ , _______ , _______ , _______ , _______ ,
-		                                        _______ , _______ , _______ ,       _______ , _______ , _______
-	),
 	// Utilities:
 	[LAYER_UTIL] = LAYOUT_moonlander(
-		_______ , _______ , _______ , _______ , ALT_F4  , _______ , _______ ,       TO_BASE , _______ , _______ , _______ , _______ , USB_PAIR, _______ ,
+		TO_GAME , _______ , _______ , _______ , ALT_F4  , _______ , _______ ,       TO_BASE , _______ , _______ , _______ , _______ , USB_PAIR, _______ ,
 		_______ , _______ , CTRL_W  , C_PGUP  , C_PGDN  , _______ , _______ ,       M_PLAY1 , M_REC1  , M_STOP  , _______ , _______ , TL_COLOR, _______ ,
 		_______ , _______ , _______ , _______ , _______ , _______ , D_PRN   ,       M_PLAY2 , M_REC2  , M_STOP  , _______ , _______ , LED_LVL , _______ ,
 		_______ , _______ , _______ , _______ , _______ , _______ ,                           _______ , _______ , _______ , RGB_VAI , RGB_VAD , _______ ,

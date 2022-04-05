@@ -60,7 +60,7 @@ const uint8_t PROGMEM ledmap[LAYER_MAX_COUNT][DRIVER_LED_TOTAL][3] = {
 		NCL, NCL, BLU, NCL, NCL, // D
 		NCL, NCL, NCL, NCL, NCL, // E
 		NCL, NCL, NCL, NCL,      // F
-		NCL, NCL, NCL,           // G
+		ORG, NCL, NCL,           // G
 		NCL, NCL, NCL, NCL,      // X
 
 		NCL, NCL, NCL, NCL, NCL, // N
@@ -71,6 +71,26 @@ const uint8_t PROGMEM ledmap[LAYER_MAX_COUNT][DRIVER_LED_TOTAL][3] = {
 		NCL, NCL, NCL, NCL,      // I
 		WHI, NCL, NCL,           // H
 		NCL, NCL, NCL, YLW       // Y
+	},
+
+	[LAYER_G_MOD] = {
+		NCL, NCL, NCL, NCL, NCL, // A
+		YLW, ORG, ORG, ORG, NCL, // B
+		YLW, ORG, ORG, ORG, NCL, // C
+		YLW, ORG, ORG, ORG, NCL, // D
+		NCL, NCL, NCL, NCL, NCL, // E
+		NCL, NCL, NCL, NCL,      // F
+		NCL, NCL, NCL,           // G
+		NCL, NCL, NCL, NCL,      // X
+
+		NCL, NCL, NCL, NCL, NCL, // N
+		NCL, NCL, NCL, NCL, NCL, // M
+		NCL, ORG, ORG, ORG, NCL, // L
+		NCL, ORG, ORG, ORG, NCL, // K
+		NCL, ORG, ORG, ORG, ORG, // J
+		NCL, NCL, NCL, BLU,      // I
+		NCL, NCL, NCL,           // H
+		NCL, NCL, NCL, NCL       // Y
 	},
 
 	[LAYER_G_TYPE] = {
@@ -213,48 +233,8 @@ const uint8_t PROGMEM ledmap[LAYER_MAX_COUNT][DRIVER_LED_TOTAL][3] = {
 		PNK, PNK, PNK, PNK       // Y
 	},
 
-	[LAYER_G_MOD_A] = {
-		WHI, PNK, YLW, PNK, PNK, // A
-		ORY, YLW, YLW, YLW, PNK, // B
-		ORY, YLW, YLW, YLW, PNK, // C
-		ORY, YLW, YLW, YLW, PNK, // D
-		ORY, PNK, BLU, BLU, PNK, // E
-		ORY, PNK, PNK, PNK,      // F
-		PNK, PNK, PNK,           // G
-		PNK, PNK, PNK, PNK,      // X
-
-		ORY, ORY, PNK, PNK, PNK, // N
-		ORY, PNK, PNK, PNK, PNK, // M
-		ORY, PNK, PNK, PNK, PNK, // L
-		ORY, PNK, PNK, PNK, PNK, // K
-		ORY, PNK, PNK, PNK, PNK, // J
-		ORY, PNK, PNK, PNK,      // I
-		PNK, PNK, PNK,           // H
-		PNK, PNK, PNK, PNK       // Y
-	},
-
-	[LAYER_G_MOD_B] = {
-		PNK, YLW, YLW, YLW, PNK, // A
-		PNK, ORY, ORY, ORY, PNK, // B
-		PNK, ORY, ORY, ORY, PNK, // C
-		PNK, ORY, ORY, ORY, PNK, // D
-		PNK, PNK, BLU, PNK, PNK, // E
-		PNK, BLU, BLU, BLU,      // F
-		PNK, PNK, PNK,           // G
-		PNK, PNK, PNK, PNK,      // X
-
-		PNK, PNK, PNK, PNK, PNK, // N
-		PNK, PNK, PNK, PNK, PNK, // M
-		PNK, PNK, PNK, PNK, PNK, // L
-		PNK, PNK, PNK, PNK, PNK, // K
-		PNK, PNK, PNK, PNK, PNK, // J
-		PNK, PNK, PNK, PNK,      // I
-		PNK, PNK, PNK,           // H
-		PNK, PNK, PNK, PNK       // Y
-	},
-
 	[LAYER_UTIL] = {
-		NCL, NCL, NCL, NCL, NCL, // A
+		PUR, NCL, NCL, NCL, NCL, // A
 		NCL, NCL, NCL, NCL, NCL, // B
 		NCL, RED, NCL, NCL, RED, // C
 		NCL, BLU, NCL, NCL, ORY, // D
