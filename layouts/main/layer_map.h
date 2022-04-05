@@ -115,9 +115,9 @@ const uint16_t PROGMEM keymaps[LAYER_MAX_COUNT][MATRIX_ROWS][MATRIX_COLS] = {
 	// Accents:
 	[LAYER_ACC] = LAYOUT_moonlander(
 		_______ , ACC_AD  , _______ , _______ , ACC_ED  , ACC_ID  , _______ ,       _______ , _______ , ACC_OD  , _______ , ACC_UD  , _______ , _______ ,
-		_______ , ACC_AG  , ACC_IQ  , _______ , ACC_EG  , ACC_IG  , _______ ,       _______ , _______ , ACC_OG  , _______ , ACC_UG  , _______ , _______ ,
+		_______ , ACC_AG  , ACC_XQ  , _______ , ACC_EG  , ACC_IG  , _______ ,       _______ , _______ , ACC_OG  , _______ , ACC_UG  , _______ , _______ ,
 		_______ , ACC_AA  , ACC_AT  , ACC_CC  , ACC_EA  , ACC_IA  , _______ ,       _______ , ACC_NT  , ACC_OA  , ACC_OT  , ACC_UA  , _______ , _______ ,
-		_______ , ACC_AC  , ACC_IE  , ACC_SS  , ACC_EC  , ACC_IC  ,                           _______ , ACC_OC  , _______ , ACC_UC  , _______ , _______ ,
+		_______ , ACC_AC  , ACC_XE  , ACC_SS  , ACC_EC  , ACC_IC  ,                           _______ , ACC_OC  , _______ , ACC_UC  , _______ , _______ ,
 		_______ , _______ , _______ , _______ , _______ ,           _______ ,       _______ ,           _______ , _______ , _______ , _______ , _______ ,
 		                                        _______ , _______ , _______ ,       _______ , _______ , _______
 	),

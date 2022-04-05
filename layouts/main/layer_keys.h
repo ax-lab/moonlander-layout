@@ -106,5 +106,5 @@ enum tap_dance_codes
 #define ACC_CC ACC_W // ç/Ç  C-cedilla
 #define ACC_NT ACC_X // ñ/Ñ  N-tilde
 #define ACC_SS ACC_Y // ß/ẞ  Eszett (ss)
-#define ACC_IQ ACC_Z // ¿    Inverted question mark
-#define ACC_IE ACC_0 // ¡    Inverted exclamation mark
+#define ACC_XQ ACC_Z // ¿    Inverted question mark
+#define ACC_XE ACC_0 // ¡    Inverted exclamation mark
