@@ -134,7 +134,7 @@ const uint8_t PROGMEM ledmap[LAYER_MAX_COUNT][DRIVER_LED_TOTAL][3] = {
 	},
 
 	[LAYER_NAV_L] = {
-		BLU, NCL, BLU, NCL, NCL, // A
+		BLU, BLU, NCL, NCL, NCL, // A
 		GRN, NCL, NCL, NCL, NCL, // B
 		NCL, NCL, BLU, NCL, NCL, // C
 		NCL, BLU, BLU, NCL, NCL, // D

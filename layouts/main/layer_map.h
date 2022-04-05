@@ -82,8 +82,8 @@ const uint16_t PROGMEM keymaps[LAYER_MAX_COUNT][MATRIX_ROWS][MATRIX_COLS] = {
 	// Navigation:
 	[LAYER_NAV_L] = LAYOUT_moonlander(
 		ON_TOP  , KC_MPLY , KC_MPRV , KC_MNXT , _______ , _______ , _______ ,       _______ , _______ , _______ , _______ , _______ , _______ , _______ ,
-		WIN_LFT , WIN_RGT , _______ , KC_UP   , KC_PGUP , _______ , _______ ,       _______ , _______ , _______ , _______ , _______ , _______ , _______ ,
-		ALT_TAB , KC_HOME , KC_LEFT , KC_DOWN , KC_RIGHT, KC_END  , _______ ,       _______ , _______ , KC_LCTRL, KC_LALT , KC_LSFT , KC_LGUI , _______ ,
+		WIN_LFT , WIN_RGT , ALT_TAB , KC_UP   , KC_PGUP , _______ , _______ ,       _______ , _______ , _______ , _______ , _______ , _______ , _______ ,
+		_______ , KC_HOME , KC_LEFT , KC_DOWN , KC_RIGHT, KC_END  , _______ ,       _______ , _______ , KC_LCTRL, KC_LALT , KC_LSFT , KC_LGUI , _______ ,
 		_______ , _______ , KC_MINUS, KC_EQUAL, KC_PGDN , _______ ,                           _______ , KC_RCTRL, KC_RALT , KC_RSFT , KC_RGUI , _______ ,
 		_______ , _______ , _______ , _______ , _______ ,           _______ ,       _______ ,           _______ , _______ , _______ , _______ , _______ ,
 		                                        _______ , _______ , _______ ,       _______ , _______ , _______
