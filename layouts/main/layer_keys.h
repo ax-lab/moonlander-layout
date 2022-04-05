@@ -78,3 +78,33 @@ enum tap_dance_codes
 #define ACC_Y  RALT(KC_Y) // ß/ẞ
 #define ACC_Z  RALT(KC_Z) // ¿
 #define ACC_0  RALT(KC_0) // ¡
+
+// Accent aliases (a = acute, g = grave, t = tilde, c = circumflex, d = diaeresis)
+
+#define ACC_AD ACC_A // ä/Ä  A-diaeresis
+#define ACC_AG ACC_B // à/À  A-grave
+#define ACC_AA ACC_C // á/Á  A-acute
+#define ACC_AC ACC_D // â/Â  A-circumflex
+#define ACC_AT ACC_E // ã/Ã  A-tilde
+#define ACC_ED ACC_F // ë/Ë  E-diaeresis
+#define ACC_EG ACC_G // è/È  E-grave
+#define ACC_EA ACC_H // é/É  E-acute
+#define ACC_EC ACC_I // ê/Ê  E-circumflex
+#define ACC_ID ACC_J // ï/Ï  I-diaeresis
+#define ACC_IG ACC_K // ì/Ì  I-grave
+#define ACC_IA ACC_L // í/Í  I-acute
+#define ACC_IC ACC_M // î/Î  I-circumflex
+#define ACC_OD ACC_N // ö/Ö  O-diaeresis
+#define ACC_OG ACC_O // ò/Ò  O-grave
+#define ACC_OA ACC_P // ó/Ó  O-acute
+#define ACC_OC ACC_Q // ô/Ô  O-circumflex
+#define ACC_OT ACC_R // õ/Õ  O-tilde
+#define ACC_UD ACC_S // ü/Ü  U-diaeresis
+#define ACC_UG ACC_T // ù/Ù  U-grave
+#define ACC_UA ACC_U // ú/Ú  U-acute
+#define ACC_UC ACC_V // û/Û  U-circumflex
+#define ACC_CC ACC_W // ç/Ç  C-cedilla
+#define ACC_NT ACC_X // ñ/Ñ  N-tilde
+#define ACC_SS ACC_Y // ß/ẞ  Eszett (ss)
+#define ACC_IQ ACC_Z // ¿    Inverted question mark
+#define ACC_IE ACC_0 // ¡    Inverted exclamation mark
