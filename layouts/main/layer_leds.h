@@ -118,10 +118,10 @@ const uint8_t PROGMEM ledmap[LAYER_MAX_COUNT][DRIVER_LED_TOTAL][3] = {
 		NCL, NCL, NCL, NCL, NCL, // B
 		NCL, NCL, NCL, NCL, NCL, // C
 		NCL, NCL, NCL, NCL, ORG, // D
-		NCL, NCL, NCL, NCL, ORG, // E
+		NCL, NCL, NCL, NCL, NCL, // E
 		NCL, NCL, NCL, NCL,      // F
 		NCL, NCL, ORG,           // G
-		NCL, GRN, GRN, ORG,      // X
+		ORG, GRN, GRN, ORG,      // X
 
 		NCL, NCL, NCL, NCL, NCL, // N
 		NCL, NCL, NCL, NCL, NCL, // M

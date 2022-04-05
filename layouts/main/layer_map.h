@@ -76,8 +76,8 @@ const uint16_t PROGMEM keymaps[LAYER_MAX_COUNT][MATRIX_ROWS][MATRIX_COLS] = {
 		_______ , KC_TILD , KC_CIRC , KC_AMPR , KC_HASH , _______ , _______ ,       _______ , _______ , KC_LBRC , KC_RBRC , KC_PLUS , KC_MINUS, _______ ,
 		_______ , KC_AT   , KC_DLR  , KC_PIPE , KC_COLN , KC_EXLM , LANG_JP ,       LANG_EN , KC_QUES , KC_LPRN , KC_RPRN , KC_GRAVE, KC_PERC , KC_MINUS,
 		_______ , _______ , KC_ASTR , KC_BSLS , KC_SLASH, _______ ,                           _______ , KC_LCBR , KC_RCBR , KC_EQUAL, KC_DQUO , KC_PGUP ,
-		_______ , _______ , _______ , KC_F22  ,  KC_F20 ,           KC_F21  ,       _______ ,           _______ , _______ , KC_HOME , KC_END  , KC_PGDN ,
-		                                        _______ , M_PLAY1 , M_PLAY2 ,       _______ , _______ , _______
+		_______ , _______ , _______ , KC_F22  , _______ ,           KC_F21  ,       _______ ,           _______ , _______ , KC_HOME , KC_END  , KC_PGDN ,
+		                                        KC_F20  , M_PLAY1 , M_PLAY2 ,       _______ , _______ , _______
 	),
 	// Navigation:
 	[LAYER_NAV_L] = LAYOUT_moonlander(
