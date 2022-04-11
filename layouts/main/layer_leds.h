@@ -254,23 +254,23 @@ const uint8_t PROGMEM ledmap[LAYER_MAX_COUNT][DRIVER_LED_TOTAL][3] = {
 	},
 
 	[LAYER_PAD] = {
-		PUR, PNK, RED, PNK, PNK, // A
-		PNK, ORY, ORY, ORY, PNK, // B
-		PNK, PNK, BLU, BLU, PNK, // C
-		PNK, BLU, BLU, BLU, BLU, // D
-		RED, PNK, BLU, BLU, PNK, // E
-		PNK, PNK, PNK, ORY,      // F
-		PNK, WHI, RED,           // G
-		ORY, ORY, PNK, ORY,      // X
+		NCL, NCL, NCL, NCL, NCL, // A
+		NCL, NCL, NCL, NCL, NCL, // B
+		NCL, NCL, NCL, NCL, NCL, // C
+		NCL, NCL, NCL, NCL, NCL, // D
+		NCL, NCL, NCL, NCL, NCL, // E
+		NCL, NCL, NCL, NCL,      // F
+		NCL, WHI, NCL,           // G
+		NCL, NCL, NCL, NCL,      // X
 
-		YLW, ORY, RED, BLU, PNK, // N
-		YLW, PNK, BLU, BLU, BLU, // M
-		PNK, YLW, YLW, YLW, PNK, // L
-		PNK, YLW, YLW, YLW, PNK, // K
-		PNK, YLW, YLW, YLW, YLW, // J
-		PNK, PNK, PNK, PNK,      // I
-		VIO, WHI, RED,           // H
-		PNK, BLU, ORY, BLU       // Y
+		GRN, PNK, RED, PNK, PNK, // N
+		PNK, PNK, PNK, NCL, PNK, // M
+		YLW, YLW, YLW, NCL, PNK, // L
+		YLW, YLW, YLW, NCL, PNK, // K
+		YLW, YLW, YLW, YLW, PNK, // J
+		PNK, PNK, PNK, BLU,      // I
+		ORG, WHI, RED,           // H
+		NCL, NCL, NCL, NCL       // Y
 	},
 
 #if 0

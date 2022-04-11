@@ -132,12 +132,12 @@ const uint16_t PROGMEM keymaps[LAYER_MAX_COUNT][MATRIX_ROWS][MATRIX_COLS] = {
 	),
 	// Pad:
 	[LAYER_PAD] = LAYOUT_moonlander(
-		TO_GAME , _______ , _______ , _______ , _______ , _______ , _______ ,       _______ , KC_CIRC , KC_ASTR , KC_SLASH, KC_PERC , KC_LPRN , KC_RPRN ,
-		ALT_TAB , KC_WH_U , KC_HOME , KC_UP   , KC_END  , KC_PGUP , _______ ,       _______ , KC_EQUAL, KC_KP_7 , KC_KP_8 , KC_KP_9 , KC_EQUAL, KC_INS  ,
-		KC_BSPC , KC_WH_D , KC_LEFT , KC_DOWN , KC_RIGHT, KC_PGDN , _______ ,       KC_BSPC , KC_PLUS , KC_KP_4 , KC_KP_5 , KC_KP_6 , KC_UP   , KC_DEL  ,
-		_______ , KC_WH_L , KC_MS_L , KC_MS_U , KC_MS_R , KC_WH_R ,                           KC_MINUS, KC_KP_1 , KC_KP_2 , KC_KP_3 , KC_LEFT , KC_RIGHT,
-		_______ , _______ , _______ , KC_MS_D , _______ ,           KC_BTN3 ,       SFT_TAB ,           KC_KP_0 , KC_COMM , KC_DOT  , KC_DOWN , KC_SCLN ,
-		                                        KC_BTN1 , KC_BTN2 , _______ ,       KC_SPC  , KC_TAB  , KC_ENT
+		_______ , _______ , _______ , _______ , _______ , _______ , _______ ,       KC_ESC  , KC_CIRC , KC_KP_7 , KC_KP_8 , KC_KP_9 , KC_EQUAL, KC_INS  ,
+		_______ , _______ , _______ , _______ , _______ , _______ , _______ ,       _______ , KC_ASTR , KC_KP_4 , KC_KP_5 , KC_KP_6 , KC_PMNS , KC_PPLS ,
+		_______ , _______ , _______ , _______ , _______ , _______ , _______ ,       KC_BSPC , KC_SLASH, KC_KP_1 , KC_KP_2 , KC_KP_3 , KC_PERC , KC_DEL  ,
+		_______ , _______ , _______ , _______ , _______ , _______ ,                           KC_NLCK , KC_KP_0 , KC_COMMA, KC_DOT  , _______ , KC_UP   ,
+		_______ , _______ , _______ , _______ , _______ ,           _______ ,       SFT_TAB ,           KC_LPRN , KC_RPRN , KC_LEFT , KC_RIGHT, KC_DOWN ,
+		                                        _______ , _______ , _______ ,       KC_PENT , KC_TAB  , _______
 	),
 
 #if 0

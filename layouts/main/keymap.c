@@ -96,7 +96,9 @@ void rgb_matrix_indicators_user(void)
 {
 	if (!is_launching) {
 		led_t led_state = host_keyboard_led_state();
-		ML_LED_5(!led_state.num_lock);
+		uint8_t cur_layer = biton32(layer_state);
+		bool alert_numlock = !led_state.num_lock && (cur_layer == LAYER_PAD || cur_layer == LAYER_G_MOD);
+		ML_LED_5(alert_numlock);
 		ML_LED_6(led_state.caps_lock);
 	}
 
