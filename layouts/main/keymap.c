@@ -1,6 +1,9 @@
 #include "moonlander.h"
 #include "version.h"
 
+#define DOUBLE_TAP_DEBOUNCE_MS 50
+float double_tap_audio_cue[][2] = SONG(H__NOTE(_A2));
+
 #ifdef CONSOLE_ENABLE
 	#define ENABLE_OUTPUT 1
 #else
@@ -218,15 +221,17 @@ bool process_special_key(special_key_state_t *state, keyrecord_t *record)
 
 		Where TT must be less or equal to the tapping term.
 	*/
+	uint32_t delta = state->time - state->prev_time;
 	bool is_double_press = pressed &&
 		(state->keycode == state->prev_keycode) &&
-		(state->time - state->prev_time <= TAPPING_TERM) &&
+		(delta <= TAPPING_TERM && delta >= DOUBLE_TAP_DEBOUNCE_MS) &&
 		(state->time - state->prev_press_time <= 2 * TAPPING_TERM);
 
 	// Double pressing CTRL and SHIFT enables the ALT key.
 	bool alt_pressed = get_mods() & MOD_MASK_ALT;
 	bool can_enable_alt = pressed && is_double_press && !alt_pressed;
 
+	bool is_double_press_key = false;
 	switch (state->keycode) {
 		case KC_LCTRL:
 			l_ctrl = pressed;
@@ -239,11 +244,11 @@ bool process_special_key(special_key_state_t *state, keyrecord_t *record)
 			break;
 		case S_CTRL:
 			s_ctrl = pressed;
-			s_ctrl_alt = can_enable_alt;
+			s_ctrl_alt = is_double_press_key = can_enable_alt;
 			break;
 		case S_SHIFT:
 			s_shift = pressed;
-			s_shift_alt = can_enable_alt;
+			s_shift_alt = is_double_press_key = can_enable_alt;
 			break;
 		case S_SYMBOL:
 			if (is_double_press) {
@@ -256,6 +261,10 @@ bool process_special_key(special_key_state_t *state, keyrecord_t *record)
 			break;
 		default:
 			return false;
+	}
+
+	if (is_double_press_key) {
+		PLAY_SONG(double_tap_audio_cue);
 	}
 
 	bool enable_shift = l_shift || (s_shift && (!s_symbol || s_shift_alt));
