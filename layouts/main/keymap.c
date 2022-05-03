@@ -199,8 +199,6 @@ bool process_special_key(special_key_state_t *state, keyrecord_t *record)
 	static bool s_shift  = false;
 	static bool s_symbol = false;
 
-	static bool accents = false;
-
 	static bool s_ctrl_alt  = false;
 	static bool s_shift_alt = false;
 
@@ -248,16 +246,10 @@ bool process_special_key(special_key_state_t *state, keyrecord_t *record)
 			break;
 		case S_SHIFT:
 			s_shift = pressed;
-			s_shift_alt = is_double_press_key = can_enable_alt;
+			s_shift_alt = is_double_press_key = can_enable_alt && false; // intentionally disabled
 			break;
 		case S_SYMBOL:
-			if (is_double_press) {
-				s_symbol = false;
-				accents = true;
-			} else {
-				s_symbol = pressed;
-				accents = false;
-			}
+			s_symbol = pressed;
 			break;
 		default:
 			return false;
@@ -298,19 +290,12 @@ bool process_special_key(special_key_state_t *state, keyrecord_t *record)
 	if (s_symbol && (s_shift && !s_shift_alt)) {
 		layer_on(LAYER_MODS);
 		layer_off(LAYER_SYM);
-		layer_off(LAYER_ACC);
 	} else if (s_symbol) {
 		layer_on(LAYER_SYM);
-		layer_off(LAYER_MODS);
-		layer_off(LAYER_ACC);
-	} else if (accents) {
-		layer_on(LAYER_ACC);
-		layer_off(LAYER_SYM);
 		layer_off(LAYER_MODS);
 	} else {
 		layer_off(LAYER_SYM);
 		layer_off(LAYER_MODS);
-		layer_off(LAYER_ACC);
 	}
 
 	send_keyboard_report();

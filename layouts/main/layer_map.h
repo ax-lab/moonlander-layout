@@ -38,7 +38,7 @@ const uint16_t PROGMEM keymaps[LAYER_MAX_COUNT][MATRIX_ROWS][MATRIX_COLS] = {
 		KC_TAB  , KC_Q    , KC_W    , KC_E    , KC_R    , KC_T    , _______ ,       TG_PAD  , KC_Y    , KC_U    , KC_I    , KC_O    , KC_MINS , KC_EQUAL,
 		KC_BSPC , KC_A    , KC_S    , KC_D    , KC_F    , KC_G    , KC_DEL  ,       KC_ESC  , KC_H    , KC_J    , KC_K    , KC_L    , KC_P    , KC_SCLN ,
 		S_CTRL  , KC_Z    , KC_X    , KC_C    , KC_V    , KC_B    ,                           KC_N    , KC_M    , KC_COMMA, KC_DOT  , KC_QUOTE, KC_UP   ,
-		KC_LALT , KC_LGUI , MO_FN   , MO_NAV_L, S_SHIFT ,           MO_MOD  ,       MO_MOD  ,           S_SYMBOL, MO_NAV_R, KC_LEFT , KC_RIGHT, KC_DOWN ,
+		KC_LALT , KC_LGUI , MO_FN   , MO_NAV_L, S_SHIFT ,           MO_ACC  ,       MO_ACC  ,           S_SYMBOL, MO_NAV_R, KC_LEFT , KC_RIGHT, KC_DOWN ,
 		                                        KC_ENT  , KC_TAB  , KC_SPC  ,       KC_ENT  , SFT_TAB , KC_SPC
 	),
 	// Game:
@@ -65,7 +65,7 @@ const uint16_t PROGMEM keymaps[LAYER_MAX_COUNT][MATRIX_ROWS][MATRIX_COLS] = {
 		_______ , _______ , _______ , _______ , _______ , _______ , _______ ,       _______ , _______ , _______ , _______ , _______ , _______ , _______ ,
 		_______ , _______ , _______ , _______ , _______ , _______ , _______ ,       _______ , _______ , _______ , _______ , _______ , _______ , _______ ,
 		_______ , _______ , _______ , _______ , _______ , _______ ,                           _______ , _______ , _______ , _______ , _______ , _______ ,
-		_______ , _______ , _______ , _______ , _______ ,           _______ ,       TO_GAME ,           _______ , _______ , _______ , _______ , _______ ,
+		_______ , _______ , _______ , _______ , KC_LSFT ,           _______ ,       TO_GAME ,           _______ , _______ , _______ , _______ , _______ ,
 		                                        _______ , _______ , _______ ,       _______ , _______ , _______
 	),
 	// Modifiers:
@@ -92,7 +92,7 @@ const uint16_t PROGMEM keymaps[LAYER_MAX_COUNT][MATRIX_ROWS][MATRIX_COLS] = {
 		WIN_LFT , WIN_RGT , ALT_TAB , KC_UP   , KC_PGUP , _______ , _______ ,       _______ , _______ , _______ , _______ , _______ , _______ , _______ ,
 		_______ , KC_HOME , KC_LEFT , KC_DOWN , KC_RIGHT, KC_END  , _______ ,       _______ , _______ , KC_LCTRL, KC_LALT , KC_LSFT , KC_LGUI , _______ ,
 		_______ , _______ , KC_MINUS, KC_EQUAL, KC_PGDN , _______ ,                           _______ , KC_RCTRL, KC_RALT , KC_RSFT , KC_RGUI , _______ ,
-		_______ , _______ , _______ , _______ , _______ ,           _______ ,       _______ ,           _______ , _______ , _______ , _______ , _______ ,
+		_______ , _______ , _______ , _______ , KC_LSFT ,           _______ ,       _______ ,           _______ , _______ , _______ , _______ , _______ ,
 		                                        _______ , _______ , _______ ,       _______ , _______ , _______
 	),
 	[LAYER_NAV_R] = LAYOUT_moonlander(
@@ -100,7 +100,7 @@ const uint16_t PROGMEM keymaps[LAYER_MAX_COUNT][MATRIX_ROWS][MATRIX_COLS] = {
 		_______ , _______ , _______ , _______ , _______ , _______ , _______ ,       _______ , _______ , KC_PGUP , KC_UP   , _______ , _______ , _______ ,
 		_______ , KC_LGUI , KC_LSFT , KC_LALT , KC_LCTRL, _______ , _______ ,       _______ , KC_HOME , KC_LEFT , KC_DOWN , KC_RIGHT, KC_END  , KC_F12  ,
 		_______ , KC_RGUI , KC_RSFT , KC_RALT , KC_RCTRL, _______ ,                           _______ , KC_PGDN , KC_EQUAL, KC_MINUS, _______ , _______ ,
-		_______ , _______ , _______ , _______ , _______ ,           _______ ,       _______ ,           _______ , _______ , _______ , _______ , _______ ,
+		_______ , _______ , _______ , _______ , KC_LSFT ,           _______ ,       _______ ,           _______ , _______ , _______ , _______ , _______ ,
 		                                        _______ , _______ , _______ ,       _______ , _______ , _______
 	),
 	// Fn-keys:
@@ -118,7 +118,7 @@ const uint16_t PROGMEM keymaps[LAYER_MAX_COUNT][MATRIX_ROWS][MATRIX_COLS] = {
 		_______ , ACC_AG  , ACC_XQ  , _______ , ACC_EG  , ACC_IG  , _______ ,       _______ , _______ , ACC_OG  , _______ , ACC_UG  , _______ , _______ ,
 		_______ , ACC_AA  , ACC_AT  , ACC_CC  , ACC_EA  , ACC_IA  , _______ ,       _______ , ACC_NT  , ACC_OA  , ACC_OT  , ACC_UA  , _______ , _______ ,
 		_______ , ACC_AC  , ACC_XE  , ACC_SS  , ACC_EC  , ACC_IC  ,                           _______ , ACC_OC  , _______ , ACC_UC  , _______ , _______ ,
-		_______ , _______ , _______ , _______ , _______ ,           _______ ,       _______ ,           _______ , _______ , _______ , _______ , _______ ,
+		_______ , _______ , _______ , _______ , KC_LSFT ,           _______ ,       _______ ,           _______ , _______ , _______ , _______ , _______ ,
 		                                        _______ , _______ , _______ ,       _______ , _______ , _______
 	),
 	// Utilities:
