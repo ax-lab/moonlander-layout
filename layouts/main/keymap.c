@@ -2,7 +2,7 @@
 #include "version.h"
 
 #define DOUBLE_TAP_DEBOUNCE_MS 50
-float double_tap_audio_cue[][2] = SONG(H__NOTE(_A2));
+float double_tap_audio_cue[][2] = SONG(H__NOTE(_A4));
 
 #ifdef CONSOLE_ENABLE
 	#define ENABLE_OUTPUT 1
