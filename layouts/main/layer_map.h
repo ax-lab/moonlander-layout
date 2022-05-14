@@ -136,7 +136,7 @@ const uint16_t PROGMEM keymaps[LAYER_MAX_COUNT][MATRIX_ROWS][MATRIX_COLS] = {
 		_______ , _______ , _______ , _______ , _______ , _______ , _______ ,       _______ , KC_ASTR , KC_KP_4 , KC_KP_5 , KC_KP_6 , KC_PMNS , KC_PPLS ,
 		_______ , _______ , _______ , _______ , _______ , _______ , _______ ,       KC_BSPC , KC_SLASH, KC_KP_1 , KC_KP_2 , KC_KP_3 , KC_PERC , KC_DEL  ,
 		_______ , _______ , _______ , _______ , _______ , _______ ,                           KC_NLCK , KC_KP_0 , KC_COMMA, KC_DOT  , _______ , KC_UP   ,
-		_______ , _______ , _______ , _______ , _______ ,           _______ ,       SFT_TAB ,           KC_LPRN , KC_RPRN , KC_LEFT , KC_RIGHT, KC_DOWN ,
+		KC_RALT , _______ , _______ , _______ , _______ ,           _______ ,       SFT_TAB ,           KC_LPRN , KC_RPRN , KC_LEFT , KC_RIGHT, KC_DOWN ,
 		                                        _______ , _______ , _______ ,       KC_PENT , KC_TAB  , _______
 	),
 
