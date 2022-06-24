@@ -140,7 +140,7 @@ const uint8_t PROGMEM ledmap[LAYER_MAX_COUNT][DRIVER_LED_TOTAL][3] = {
 		NCL, NCL, NCL, NCL, ORG, // D
 		NCL, NCL, NCL, NCL, NCL, // E
 		NCL, NCL, NCL, NCL,      // F
-		NCL, NCL, ORG,           // G
+		RED, BLU, ORG,           // G
 		ORG, GRN, GRN, ORG,      // X
 
 		NCL, NCL, NCL, NCL, NCL, // N
@@ -194,23 +194,23 @@ const uint8_t PROGMEM ledmap[LAYER_MAX_COUNT][DRIVER_LED_TOTAL][3] = {
 	},
 
 	[LAYER_FN] = {
-		BLU, PNK, PNK, PNK, BLU, // A
-		ORY, ORY, GRN, PNK, PNK, // B
-		ORY, ORY, GRN, PNK, PNK, // C
-		ORY, ORY, GRN, PNK, PNK, // D
-		ORY, ORY, GRN, PNK, PNK, // E
-		ORY, ORY, PNK, PNK,      // F
-		YLW, YLW, ORY,           // G
-		PNK, PNK, PNK, PNK,      // X
+		NCL, NCL, NCL, NCL, NCL, // A
+		ORG, NCL, NCL, NCL, NCL, // B
+		ORG, NCL, ORG, NCL, NCL, // C
+		ORG, NCL, ORG, NCL, NCL, // D
+		ORG, NCL, ORG, NCL, NCL, // E
+		ORG, NCL, ORG, NCL,      // F
+		NCL, NCL, NCL,           // G
+		NCL, NCL, NCL, NCL,      // X
 
-		PNK, PNK, PNK, PNK, PNK, // N
-		PNK, YLW, YLW, YLW, PNK, // M
-		PNK, ORY, ORY, ORY, PNK, // L
-		PNK, ORY, ORY, ORY, PNK, // K
-		PNK, ORY, ORY, ORY, PNK, // J
-		PNK, YLW, YLW, YLW,      // I
-		PNK, PNK, BLU,           // H
-		PNK, PNK, PNK, PNK       // Y
+		ORG, ORG, NCL, NCL, NCL, // N
+		ORG, NCL, NCL, NCL, NCL, // N
+		ORG, YLW, YLW, YLW, NCL, // M
+		ORG, YLW, YLW, YLW, NCL, // L
+		ORG, YLW, YLW, YLW, NCL, // K
+		ORG, NCL, YLW, NCL,      // I
+		BLU, GRN, NCL,           // H
+		NCL, NCL, NCL, NCL       // Y
 	},
 
 	[LAYER_ACC] = {
@@ -250,26 +250,6 @@ const uint8_t PROGMEM ledmap[LAYER_MAX_COUNT][DRIVER_LED_TOTAL][3] = {
 		NCL, RED, RED, NCL, NCL, // J
 		NCL, ORY, ORY, NCL,      // I
 		WHI, GRN, GRN,           // H
-		NCL, NCL, NCL, NCL       // Y
-	},
-
-	[LAYER_PAD] = {
-		NCL, NCL, NCL, NCL, NCL, // A
-		NCL, NCL, NCL, NCL, NCL, // B
-		NCL, NCL, NCL, NCL, NCL, // C
-		NCL, NCL, NCL, NCL, NCL, // D
-		NCL, NCL, NCL, NCL, NCL, // E
-		NCL, NCL, NCL, NCL,      // F
-		NCL, WHI, NCL,           // G
-		NCL, NCL, NCL, NCL,      // X
-
-		GRN, PNK, RED, PNK, PNK, // N
-		PNK, PNK, PNK, NCL, PNK, // M
-		YLW, YLW, YLW, NCL, PNK, // L
-		YLW, YLW, YLW, NCL, PNK, // K
-		YLW, YLW, YLW, YLW, PNK, // J
-		PNK, PNK, PNK, BLU,      // I
-		ORG, WHI, RED,           // H
 		NCL, NCL, NCL, NCL       // Y
 	},
 
