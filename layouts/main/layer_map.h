@@ -33,7 +33,7 @@ const uint16_t PROGMEM keymaps[LAYER_MAX_COUNT][MATRIX_ROWS][MATRIX_COLS] = {
 	// Base:
 	[LAYER_BASE] = LAYOUT_moonlander(
 		KC_ESC  , KC_1    , KC_2    , KC_3    , KC_4    , KC_5    , MO_FN   ,       MO_FN   , KC_6    , KC_7    , KC_8    , KC_9    , KC_0    , TG_UTIL ,
-		MO_FN   , KC_Q    , KC_W    , KC_E    , KC_R    , KC_T    , _______ ,       _______ , KC_Y    , KC_U    , KC_I    , KC_O    , KC_MINS , KC_EQUAL,
+		MO_FN   , KC_Q    , KC_W    , KC_E    , KC_R    , KC_T    , D_PRN   ,       _______ , KC_Y    , KC_U    , KC_I    , KC_O    , KC_MINS , KC_EQUAL,
 		KC_BSPC , KC_A    , KC_S    , KC_D    , KC_F    , KC_G    , KC_DEL  ,       KC_ESC  , KC_H    , KC_J    , KC_K    , KC_L    , KC_P    , KC_SCLN ,
 		KC_LCTRL, KC_Z    , KC_X    , KC_C    , KC_V    , KC_B    ,                           KC_N    , KC_M    , KC_COMMA, KC_DOT  , KC_QUOTE, KC_UP   ,
 		KC_LALT , KC_LGUI , MO_FN   , MO_NAV_L, S_SHIFT ,           MO_ACC  ,       MO_ACC  ,           S_SYMBOL, MO_NAV_R, KC_LEFT , KC_RIGHT, KC_DOWN ,
