@@ -7,8 +7,10 @@ HSV rainbow_color_for_position(uint8_t row, uint8_t col, bool print)
 	uint8_t v = ((float)pos / (max - 1)) * 0xFF;
 	HSV hsv = { v, 255, 255 };
 	if (print) {
+		#if ENABLE_OUTPUT
 		RGB rgb = hsv_to_rgb(hsv);
 		output("HUE = %d / RGB: #%02X%02X%02X\n", v, rgb.r, rgb.g, rgb.b);
+		#endif
 	}
 	return hsv;
 }
